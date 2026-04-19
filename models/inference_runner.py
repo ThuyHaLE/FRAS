@@ -7,7 +7,7 @@ Usage:
 
     submission = predict(
         test_df         = test_df,
-        checkpoint_path = "checkpoints/inference.pkl",
+        checkpoint_path = "models/checkpoints/inference.pkl",
     )
     submission.to_csv("submission.csv", index=False)
 """
