@@ -1,4 +1,4 @@
-// dashboard/src/alarms/tabAlarms.js
+// dashboard/src/alarms/tabAlarms.jsx
 // Tab for cross-module alarms and scenarios 
 // Each scenario combines multiple features across modules to assess specific risk factors 
 // or forecast outcomes related to fire behavior and impact.
