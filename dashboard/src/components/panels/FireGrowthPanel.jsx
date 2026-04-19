@@ -2,7 +2,8 @@
 // Panel for fire growth related features and alarms
 
 import { useState, useCallback } from "react";
-import { applyFGDerived, useFgAlarm } from "../../utils/alarmUtils";
+import { applyFGDerived } from "../../utils/alarmUtils";
+import { useFgAlarm } from "../../alarms/tabAlarms";
 import { FG_FEATURES, FG_GROUPS } from "../../constants/featureRanges";
 import { MiniStat } from "../shared/MiniStat";
 import { GroupCard } from "../shared/GroupCard";
