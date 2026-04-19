@@ -5,7 +5,7 @@
 // It provides a simple interface with a file input and a textarea, along with error feedback if the JSON is invalid. 
 
 import React, { useState } from "react";
-import { ACCENT } from "../constants/featureRanges"; 
+import { ACCENT } from "../../constants/featureRanges";
 
 export function JsonUploadModal({ onApply, onClose }) {
   const [text, setText] = useState("");
