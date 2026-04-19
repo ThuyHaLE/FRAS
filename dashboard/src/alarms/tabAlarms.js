@@ -1,17 +1,17 @@
-// src/alarms/tabAlarms.js
+// dashboard/src/alarms/tabAlarms.js
 // Tab for cross-module alarms and scenarios 
 // Each scenario combines multiple features across modules to assess specific risk factors 
 // or forecast outcomes related to fire behavior and impact.
 // Scenarios are designed to be interpretable and actionable for emergency managers, 
 // providing clear signals and summaries that can inform decision-making during fire events.
 
-import { clamp01, alarmLevel } from "./utils/alarmUtils";
-import { CrossModuleAlarmCard } from "./components/CrossModuleAlarmCard";
-import { FEATURE_RANGES, R } from "./constants/featureRanges";
+import { clamp01, alarmLevel } from "../utils/alarmUtils";
+import { CrossModuleAlarmCard } from "../components/shared/CrossModuleAlarmCard";
+import { FEATURE_RANGES, R } from "../constants/featureRanges";
 import { scenarioETA, scenarioSpreadPressure, scenarioNightScale,
          scenarioContainmentDifficulty, scenarioTrajectoryConfidence,
          scenarioSurgeRisk, scenarioSeasonalVulnerability,
-         scenarioDataSparseRisk } from "./scenarios/crossModuleScenarios";
+         scenarioDataSparseRisk } from "../scenarios/crossModuleScenarios";
          
 const R = (id) => FEATURE_RANGES[id];
 

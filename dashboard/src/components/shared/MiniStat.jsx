@@ -1,4 +1,4 @@
-// src/components/shared/MiniStat.jsx
+// dashboard/src/components/shared/MiniStat.jsx
 // A small card component for displaying a single statistic with a label and optional subtext.
 
 export function MiniStat({ label, value, sub }) {

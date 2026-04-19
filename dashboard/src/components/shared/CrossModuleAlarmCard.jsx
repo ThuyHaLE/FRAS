@@ -1,7 +1,7 @@
-// src/components/shared/CrossModuleAlarmCard.jsx
+// dashboard/src/components/shared/CrossModuleAlarmCard.jsx
 // A compact card component to display alarm information across different modules (e.g. temporal, spatial, etc.)
 
-import { clamp01, alarmLevel, BADGE_STYLES, ALARM_DOT_COLORS } from "./utils/alarmUtils";
+import { clamp01, alarmLevel, BADGE_STYLES, ALARM_DOT_COLORS } from "../../utils/alarmUtils";
 import { SignalBar } from "./SignalBar";
 
 function SourceTag({ label }) {

@@ -1,7 +1,7 @@
-// src/components/shared/SimpleBar.jsx
+// dashboard/src/components/shared/SimpleBar.jsx
 // A simple horizontal bar that fills according to the normalized value of a feature. Used in the metadata cards.
 
-import { ACCENT } from "./constants/featureRanges";
+import { ACCENT } from "../../constants/featureRanges";
 
 export function SimpleBar({ feature, value }) {
   const norm = Math.min(Math.max(feature.toNorm(value), 0), 1);

@@ -1,4 +1,4 @@
-// src/FireRiskDashboard.jsx
+// dashboard/src/FireRiskDashboard.jsx
 // Main dashboard component for the Fire Risk Assessment System (FRAS).
 
 import React, { useState, useCallback, useEffect } from "react";

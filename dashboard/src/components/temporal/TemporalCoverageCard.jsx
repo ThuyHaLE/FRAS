@@ -1,4 +1,4 @@
-// src/components/temporal/TemporalCoverageCard.jsx
+// dashboard/src/components/temporal/TemporalCoverageCard.jsx
 // This component displays temporal coverage metrics for a fire event, 
 // including the number of perimeters in the first 5 hours and the time between the first and last perimeter. 
 // It also indicates whether the temporal resolution is considered low based on specific criteria.

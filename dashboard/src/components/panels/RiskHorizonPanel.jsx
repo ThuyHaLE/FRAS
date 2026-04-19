@@ -1,8 +1,8 @@
-// src/components/panels/RiskHorizonPanel.jsx
+// dashboard/src/components/panels/RiskHorizonPanel.jsx
 // This panel shows the probability of reaching the nearest evacuation zone 
 // within different time horizons (e.g. 6h, 12h, 24h, 72h).
 
-import { RH_HORIZONS, ACCENT } from "./constants/featureRanges";
+import { RH_HORIZONS, ACCENT } from "../../constants/featureRanges";
 
 function HorizonCard({ horizon, prob }) {
   const pct = Math.round(prob * 100);

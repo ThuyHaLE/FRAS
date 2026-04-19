@@ -1,7 +1,7 @@
-// src/components/temporal/TemporalMetadataCard.jsx
+// dashboard/src/components/temporal/TemporalMetadataCard.jsx
 // This component displays temporal metadata (hour, day of week, month) for a given event.
 
-import { R, ACCENT, DOW_LABELS, MONTH_LABELS } from "./constants/featureRanges";
+import { R, ACCENT, DOW_LABELS, MONTH_LABELS } from "../../constants/featureRanges";
 
 export function TemporalMetadataCard({ vals }) {
   const hour       = vals.event_start_hour;

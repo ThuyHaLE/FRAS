@@ -1,12 +1,12 @@
-// src/components/panels/CentroidKinematicsPanel.jsx
+// dashboard/src/components/panels/CentroidKinematicsPanel.jsx
 // Panel for displaying centroid kinematics features and alarms
 
 import { useState, useCallback } from "react";
-import { MiniStat } from "./components/shared/MiniStat";
-import { GroupCard } from "./components/shared/GroupCard";
-import { AlarmBanner } from "./components/shared/AlarmBanner";
-import { CK_FEATURES, CK_GROUPS } from "./constants/featureRanges";
-import { useCkAlarm } from "./alarms/tabAlarms";
+import { MiniStat } from "../shared/MiniStat";
+import { GroupCard } from "../shared/GroupCard";
+import { AlarmBanner } from "../shared/AlarmBanner";
+import { CK_FEATURES, CK_GROUPS } from "../../constants/featureRanges";
+import { useCkAlarm } from "../../alarms/tabAlarms";
 
 export function CentroidKinematicsPanel({ vals, setVals }) {
   const [active, setActive] = useState(null);

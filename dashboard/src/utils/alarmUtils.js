@@ -1,4 +1,4 @@
-// src/utils/alarmUtils.js
+// dashboard/src/utils/alarmUtils.js
 // Utility functions for alarm level calculation and formatting
 
 export function clamp01(v) { return Math.min(1, Math.max(0, v)); }

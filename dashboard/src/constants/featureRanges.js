@@ -1,4 +1,4 @@
-// src/constants/featureRanges.js
+// dashboard/src/constants/featureRanges.js
 // Defines the ranges, normalization functions, and metadata for all features used in the wildfire risk dashboard.
 // This file centralizes all feature-related constants, making it easy to maintain and update feature definitions in one place.
 

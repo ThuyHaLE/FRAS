@@ -1,15 +1,15 @@
-// src/components/panels/DirectionalityPanel.jsx
+// dashboard/src/components/panels/DirectionalityPanel.jsx
 // This panel focuses on features related to the directionality of the threat, 
 // such as alignment cosine and along-track speed, 
 // which indicate how directly the threat is moving towards the evacuation zone. 
 // It also includes an alarm banner to highlight any significant directional threat signals.
 
 import { useState, useCallback } from "react";
-import { MiniStat } from "./components/shared/MiniStat";
-import { GroupCard } from "./components/shared/GroupCard";
-import { AlarmBanner } from "./components/shared/AlarmBanner";
-import { DIR_FEATURES, DIR_GROUPS } from "./constants/featureRanges";
-import { useDirAlarm } from "./alarms/tabAlarms";
+import { MiniStat } from "../shared/MiniStat";
+import { GroupCard } from "../shared/GroupCard";
+import { AlarmBanner } from "../shared/AlarmBanner";
+import { DIR_FEATURES, DIR_GROUPS } from "../../constants/featureRanges";
+import { useDirAlarm } from "../../alarms/tabAlarms";
 
 export function DirectionalityPanel({ vals, setVals }) {
   const [active, setActive] = useState(null);

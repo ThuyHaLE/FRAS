@@ -1,11 +1,11 @@
-// src/components/editor/JsonUploadModal.jsx
+// dashboard/src/components/editor/JsonUploadModal.jsx
 // Model alowing users to upload or paste JSON parameters for the model, with basic validation and error handling.
 // This component is used in the Editor page to allow users to quickly load parameters from a JSON file or text input, 
 // which can be useful for sharing configurations or restoring previous states. 
 // It provides a simple interface with a file input and a textarea, along with error feedback if the JSON is invalid. 
 
 import React, { useState } from "react";
-import { ACCENT } from "./constants/featureRanges"; 
+import { ACCENT } from "../constants/featureRanges"; 
 
 export function JsonUploadModal({ onApply, onClose }) {
   const [text, setText] = useState("");

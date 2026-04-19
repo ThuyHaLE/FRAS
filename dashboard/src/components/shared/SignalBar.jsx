@@ -1,7 +1,7 @@
-// src/components/shared/SignalBar.jsx
+// dashboard/src/components/shared/SignalBar.jsx
 // A simple horizontal bar that fills according to a value between 0 and 1, colored according to the alarm level.
 
-import { clamp01 } from "./utils/alarmUtils";
+import { clamp01 } from "../../utils/alarmUtils";
 
 export function SignalBar({ value, color }) {
   const pct = Math.round(clamp01(value) * 100);

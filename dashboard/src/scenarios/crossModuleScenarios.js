@@ -1,10 +1,10 @@
-// src/scenarios/crossModuleScenarios.js
+// dashboard/src/scenarios/crossModuleScenarios.js
 // This file defines composite scenarios that integrate signals from multiple modules 
 // to provide higher-level insights about fire behavior and risk. Each scenario function takes relevant input values,
 // computes a combined score, and returns a structured object with title, subtitle, sources, signals, 
 // and summary messages for different alarm levels.
 
-import { clamp01, alarmLevel } from "./utils/alarmUtils";
+import { clamp01, alarmLevel } from "../../utils/alarmUtils";
 
 export function scenarioETA(ckVals, rsVals) {
   const v = { ...ckVals, ...rsVals };

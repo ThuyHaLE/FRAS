@@ -1,13 +1,13 @@
-// src/components/panels/OverviewPanel.jsx
+// dashboard/src/components/panels/OverviewPanel.jsx
 // This component serves as a high-level overview of the current event, 
 // showing key parameters and metrics across modules, as well as temporal coverage and metadata. 
 // It also includes the new cross-module alarms summary.
 
-import { ParamEditor } from "./components/editor/ParamEditor";
-import { TemporalCoverageCard } from "./components/temporal/TemporalCoverageCard";
-import { TemporalMetadataCard } from "./components/temporal/TemporalMetadataCard"; 
-import { CrossModuleAlarms } from "./alarms/tabAlarms";
-import { ACCENT, RH_HORIZONS } from "./constants/featureRanges";
+import { ParamEditor } from "../editor/ParamEditor";
+import { TemporalCoverageCard } from "../temporal/TemporalCoverageCard";
+import { TemporalMetadataCard } from "../temporal/TemporalMetadataCard";
+import { CrossModuleAlarms } from "../../alarms/tabAlarms";
+import { ACCENT, RH_HORIZONS } from "../../constants/featureRanges";
 
 function useEditorVals({ ckVals, setCkVals, fgVals, setFgVals, dirVals, setDirVals, rsVals, setRsVals, tcVals, setTcVals, tmVals, setTmVals }) {
   return { ck: [ckVals, setCkVals], fg: [fgVals, setFgVals], dir: [dirVals, setDirVals], rs: [rsVals, setRsVals], tc: [tcVals, setTcVals], tm: [tmVals, setTmVals] };

@@ -1,7 +1,7 @@
-// src/components/shared/AlarmBanner.jsx
+// dashboard/src/components/shared/AlarmBanner.jsx
 // A compact banner component to display alarm signals and summary information.
 
-import { clamp01, alarmLevel, BADGE_STYLES, ALARM_DOT_COLORS } from "./utils/alarmUtils";
+import { clamp01, alarmLevel, BADGE_STYLES, ALARM_DOT_COLORS } from "../../utils/alarmUtils";
 import { SignalBar } from "./SignalBar";
 
 export function AlarmBanner({ title, signals, summary, overallScore, accentColor }) {

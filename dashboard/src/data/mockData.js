@@ -1,4 +1,4 @@
-// src/data/mockData.js
+// dashboard/src/data/mockData.js
 // This file contains mock data for testing and development purposes. 
 // The data structure mimics the expected output from the API, 
 // allowing developers to work with realistic data without needing to make actual API calls.

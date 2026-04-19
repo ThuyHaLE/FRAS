@@ -1,12 +1,12 @@
-// src/components/panels/ProximityPanel.jsx
+// dashboard/src/components/panels/ProximityPanel.jsx
 // Panel for proximity-related features and alarms in the FRAS dashboard.
 
 import { useState, useCallback } from "react";
-import { MiniStat } from "./components/shared/MiniStat";
-import { GroupCard } from "./components/shared/GroupCard";
-import { AlarmBanner } from "./components/shared/AlarmBanner";
-import { RS_GROUPS, RS_FEATURES } from "./constants/featureRanges";
-import { useRsAlarm } from "./alarms/tabAlarms";
+import { MiniStat } from "../shared/MiniStat";
+import { GroupCard } from "../shared/GroupCard";
+import { AlarmBanner } from "../shared/AlarmBanner";
+import { RS_GROUPS, RS_FEATURES } from "../../constants/featureRanges";
+import { useRsAlarm } from "../../alarms/tabAlarms";
 
 export function ProximityPanel({ vals, setVals }) {
   const [active, setActive] = useState(null);

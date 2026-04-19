@@ -1,10 +1,10 @@
-// src/components/editor/ParamEditor.jsx
+// dashboard/src/components/editor/ParamEditor.jsx
 // A component for adjusting feature parameters via sliders and number inputs, 
 // with support for uploading JSON files to set multiple parameters at once.
 
 import { useState, useEffect } from "react";
-import { FEATURE_RANGES, ACCENT } from "./constants/featureRanges";
-import { fmtFieldVal, applyFGDerived } from "./utils/alarmUtils";
+import { FEATURE_RANGES, ACCENT } from "../../constants/featureRanges";
+import { fmtFieldVal, applyFGDerived } from "../../utils/alarmUtils";
 import { JsonUploadModal } from "./JsonUploadModal";
 
 const EDITOR_MODULES = [

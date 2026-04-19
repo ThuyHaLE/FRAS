@@ -1,4 +1,4 @@
-// src/components/shared/GroupCard.jsx
+// dashboard/src/components/shared/GroupCard.jsx
 // A card that groups features together, with a header and a list of FeatureCards.
 
 import { FeatureCard } from "./FeatureCard";

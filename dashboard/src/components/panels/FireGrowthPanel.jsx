@@ -1,12 +1,12 @@
-// src/components/panels/FireGrowthPanel.jsx
+// dashboard/src/components/panels/FireGrowthPanel.jsx
 // Panel for fire growth related features and alarms
 
 import { useState, useCallback } from "react";
-import { applyFGDerived, useFgAlarm } from "./utils/alarmUtils";
-import { FG_FEATURES, FG_GROUPS } from "./constants/featureRanges";
-import { MiniStat } from "./components/shared/MiniStat";
-import { GroupCard } from "./components/shared/GroupCard";
-import { AlarmBanner } from "./components/shared/AlarmBanner";
+import { applyFGDerived, useFgAlarm } from "../../utils/alarmUtils";
+import { FG_FEATURES, FG_GROUPS } from "../../constants/featureRanges";
+import { MiniStat } from "../shared/MiniStat";
+import { GroupCard } from "../shared/GroupCard";
+import { AlarmBanner } from "../shared/AlarmBanner";
 
 export function FireGrowthPanel({ vals, setVals }) {
   const [active, setActive] = useState(null);

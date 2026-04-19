@@ -1,9 +1,9 @@
-// src/components/shared/FeatureCard.jsx
+// dashboard/src/components/shared/FeatureCard.jsx
 // A card component for displaying a feature with its value, 
 // and allowing the user to toggle it active/inactive and adjust its value if active.
 
-import { FEATURE_RANGES, ACCENT } from "./constants/featureRanges";
-import { fmtVal, formatTick } from "./utils/alarmUtils";
+import { FEATURE_RANGES, ACCENT } from "../../constants/featureRanges";
+import { fmtVal, formatTick } from "../../utils/alarmUtils";
 import { SimpleBar } from "./SimpleBar";
 
 export function FeatureCard({ feature, value, isActive, onToggle, onUpdate }) {
