@@ -12,8 +12,6 @@ import { scenarioETA, scenarioSpreadPressure, scenarioNightScale,
          scenarioContainmentDifficulty, scenarioTrajectoryConfidence,
          scenarioSurgeRisk, scenarioSeasonalVulnerability,
          scenarioDataSparseRisk } from "../scenarios/crossModuleScenarios";
-         
-const R = (id) => FEATURE_RANGES[id];
 
 export function useCkAlarm(vals) {
   const displacement = clamp01(vals.centroid_displacement_m / R("centroid_displacement_m").max);
