@@ -6,7 +6,7 @@
 // providing clear signals and summaries that can inform decision-making during fire events.
 
 import { clamp01, alarmLevel } from "./utils/alarmUtils.js";
-import { CrossModuleAlarmCard } from "./components/CrossModuleAlarmCard.jsx";
+import { CrossModuleAlarmCard } from "./components/CrossModuleAlarmCard";
 import { FEATURE_RANGES, R } from "./constants/featureRanges.js";
 import { scenarioETA, scenarioSpreadPressure, scenarioNightScale,
          scenarioContainmentDifficulty, scenarioTrajectoryConfidence,
