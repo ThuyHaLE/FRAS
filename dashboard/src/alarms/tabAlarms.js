@@ -5,9 +5,9 @@
 // Scenarios are designed to be interpretable and actionable for emergency managers, 
 // providing clear signals and summaries that can inform decision-making during fire events.
 
-import { clamp01, alarmLevel } from "./utils/alarmUtils.js";
+import { clamp01, alarmLevel } from "./utils/alarmUtils";
 import { CrossModuleAlarmCard } from "./components/CrossModuleAlarmCard";
-import { FEATURE_RANGES, R } from "./constants/featureRanges.js";
+import { FEATURE_RANGES, R } from "./constants/featureRanges";
 import { scenarioETA, scenarioSpreadPressure, scenarioNightScale,
          scenarioContainmentDifficulty, scenarioTrajectoryConfidence,
          scenarioSurgeRisk, scenarioSeasonalVulnerability,

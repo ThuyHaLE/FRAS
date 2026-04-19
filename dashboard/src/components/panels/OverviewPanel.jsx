@@ -3,7 +3,7 @@
 // showing key parameters and metrics across modules, as well as temporal coverage and metadata. 
 // It also includes the new cross-module alarms summary.
 
-import { ParamEditor } from "./components/editor/ParamEditor.jsx";
+import { ParamEditor } from "./components/editor/ParamEditor";
 import { TemporalCoverageCard } from "./components/temporal/TemporalCoverageCard";
 import { TemporalMetadataCard } from "./components/temporal/TemporalMetadataCard"; 
 import { CrossModuleAlarms } from "./alarms/tabAlarms";
