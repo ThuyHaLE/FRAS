@@ -323,7 +323,7 @@ export const DIR_GROUPS = [
 // ═══════════════════════════════════════════════════════════════════════════════
 // ── RISK SCORE (PROXIMITY) features
 // ═══════════════════════════════════════════════════════════════════════════════
-const RS_FEATURES = [
+export const RS_FEATURES = [
   {
     group: 0, id: "dist_min_ci_0_5h", label: "dist_min_ci_0_5h", unit: "m",
     scaleLabels: [R("dist_min_ci_0_5h").min, 
