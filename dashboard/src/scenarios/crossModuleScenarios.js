@@ -4,7 +4,7 @@
 // computes a combined score, and returns a structured object with title, subtitle, sources, signals, 
 // and summary messages for different alarm levels.
 
-import { clamp01, alarmLevel } from "../../utils/alarmUtils";
+import { clamp01, alarmLevel } from "../utils/alarmUtils";
 
 export function scenarioETA(ckVals, rsVals) {
   const v = { ...ckVals, ...rsVals };
