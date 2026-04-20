@@ -1,11 +1,14 @@
 // dashboard/src/components/editor/ParamEditor.jsx
-// A component for adjusting feature parameters via sliders and number inputs, 
-// with support for uploading JSON files to set multiple parameters at once.
+// A collapsible panel for adjusting feature parameters with sliders and numeric inputs, 
+// and a Predict button to run the model with the current params. 
+// This is meant for power users to understand how different features affect the model's predictions, 
+// and to quickly test hypothetical scenarios by tweaking feature values.
 
 import { useState, useEffect } from "react";
 import { FEATURE_RANGES, ACCENT } from "../../constants/featureRanges";
 import { fmtFieldVal, applyFGDerived } from "../../utils/alarmUtils";
-import { JsonUploadModal } from "./JsonUploadModal";
+
+const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
 const EDITOR_MODULES = [
   { key: "ck", label: "Centroid Kinematics", dotColor: ACCENT,
@@ -68,41 +71,16 @@ const EDITOR_MODULES = [
   },
 ];
 
-const MODULE_KEY_MAP = {
-  ck:  ["centroid_displacement_m","centroid_speed_m_per_h","spread_bearing_deg","spread_bearing_sin","spread_bearing_cos"],
-  fg:  ["area_first_ha","log1p_area_first","area_growth_abs_0_5h","log1p_growth","area_growth_rel_0_5h","relative_growth_0_5h","log_area_ratio_0_5h","area_growth_rate_ha_per_h","radial_growth_m","radial_growth_rate_m_per_h"],
-  dir: ["alignment_cos","alignment_abs","cross_track_component","along_track_speed"],
-  rs:  ["dist_min_ci_0_5h","dist_std_ci_0_5h","dist_change_ci_0_5h","dist_slope_ci_0_5h","closing_speed_m_per_h","dist_accel_m_per_h2","projected_advance_m","closing_speed_abs_m_per_h","dist_fit_r2_0_5h"],
-  tc:  ["num_perimeters_0_5h","dt_first_last_0_5h","low_temporal_resolution_0_5h"],
-  tm:  ["event_start_hour","event_start_dayofweek","event_start_month"],
-};
-
-const NESTED_MAP = {
-  centroidKinematics: "ck", fireGrowth: "fg", directionality: "dir",
-  riskScore: "rs", temporalCoverage: "tc", temporalMetadata: "tm",
-};
-
-function applyJsonToEditorMap(parsed, editorMap) {
-  const flat = {};
-  Object.entries(NESTED_MAP).forEach(([jsonKey]) => {
-    if (parsed[jsonKey] && typeof parsed[jsonKey] === "object") Object.assign(flat, parsed[jsonKey]);
+// Collect all vals from editorMap into a single flat object for submission to /api/predict
+function collectEvent(editorMap) {
+  const event = {
+    event_id: Math.floor(Math.random() * 90_000_000) + 10_000_000, // 8-digit random
+  };
+  EDITOR_MODULES.forEach(({ key, fields }) => {
+    const [vals] = editorMap[key];
+    fields.forEach(({ id }) => { if (vals?.[id] !== undefined) event[id] = vals[id]; });
   });
-  Object.entries(parsed).forEach(([k, v]) => { if (typeof v === "number") flat[k] = v; });
-  const updates = {};
-  Object.entries(MODULE_KEY_MAP).forEach(([modKey, fields]) => {
-    const [vals] = editorMap[modKey];
-    const patch = {};
-    fields.forEach((fid) => { if (flat[fid] !== undefined) patch[fid] = flat[fid]; });
-    if (Object.keys(patch).length) updates[modKey] = { ...vals, ...patch };
-  });
-  if (updates.fg) {
-    let fg = updates.fg;
-    if (fg.area_first_ha !== undefined)        fg = applyFGDerived(fg, "area_first_ha", fg.area_first_ha);
-    if (fg.area_growth_abs_0_5h !== undefined) fg = applyFGDerived(fg, "area_growth_abs_0_5h", fg.area_growth_abs_0_5h);
-    updates.fg = fg;
-  }
-  if (updates.tc) updates.tc.low_temporal_resolution_0_5h = (updates.tc.dt_first_last_0_5h < 0.5 || updates.tc.num_perimeters_0_5h <= 1) ? 1 : 0;
-  return updates;
+  return event;
 }
 
 function EditorField({ field, value, onChange }) {
@@ -156,33 +134,103 @@ function EditorModuleSection({ mod, vals, onChange }) {
   );
 }
 
-export function ParamEditor({ editorMap }) {
-  const [open, setOpen]           = useState(false);
-  const [showUpload, setShowUpload] = useState(false);
-  function handleApplyJson(parsed) {
-    const updates = applyJsonToEditorMap(parsed, editorMap);
-    Object.entries(updates).forEach(([modKey, newVals]) => { const [, setVals] = editorMap[modKey]; setVals(newVals); });
+// ── PredictFooter: display below the sliders when open ──────────────────────
+function PredictFooter({ editorMap, onPredict }) {
+  const [loading, setLoading] = useState(false);
+  const [error,   setError]   = useState(null);
+
+  async function handlePredict() {
+    setLoading(true);
+    setError(null);
+    try {
+      const event = collectEvent(editorMap);
+      const res  = await fetch(`${API_BASE}/api/predict`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.detail ?? `HTTP ${res.status}`);
+      if (typeof onPredict === "function") onPredict(data.result);
+    } catch (e) {
+      setError(`Lỗi predict: ${e.message}`);
+    } finally {
+      setLoading(false);
+    }
   }
+
   return (
-    <>
-      {showUpload && <JsonUploadModal onApply={handleApplyJson} onClose={() => setShowUpload(false)} />}
-      <div style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 10, marginBottom: 14, overflow: "hidden" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px" }}>
-          <span style={{ fontSize: 13 }}>⚙</span>
-          <span style={{ fontSize: 12, fontWeight: 500, color: "var(--color-text-primary)", flex: 1 }}>Adjust parameters</span>
-          <button onClick={() => setShowUpload(true)} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 5, border: "0.5px solid var(--color-border-secondary)", background: "transparent", color: "var(--color-text-secondary)", cursor: "pointer", marginRight: 6 }}>↑ Upload JSON</button>
-          <span style={{ fontSize: 10, color: "var(--color-text-tertiary)", marginRight: 8 }}>Slider + số — thay đổi realtime</span>
-          <button onClick={() => setOpen((p) => !p)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "var(--color-text-tertiary)", padding: 0 }}>{open ? "▲" : "▼"}</button>
-        </div>
-        {open && (
+    <div style={{
+      padding: "10px 14px",
+      borderTop: "0.5px solid var(--color-border-tertiary)",
+      display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+    }}>
+      <div style={{ fontSize: 10, color: "var(--color-text-tertiary)" }}>
+        Điều chỉnh params bên trên, rồi nhấn Predict để chạy model.
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+        {error && (
+          <span style={{ fontSize: 11, color: "#c44" }}>{error}</span>
+        )}
+        {loading && (
+          <span style={{ fontSize: 11, color: "var(--color-text-tertiary)" }}>
+            <span style={{ display: "inline-block", animation: "spin 1s linear infinite" }}>⏳</span>
+            {" "}Đang predict…
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </span>
+        )}
+        <button
+          onClick={handlePredict}
+          disabled={loading}
+          style={{
+            fontSize: 12, padding: "6px 16px", borderRadius: 6, border: "none",
+            background: loading ? "var(--color-background-secondary)" : ACCENT,
+            color: loading ? "var(--color-text-tertiary)" : "#fff",
+            cursor: loading ? "default" : "pointer",
+            fontWeight: 600, letterSpacing: "0.02em",
+          }}
+        >
+          {loading ? "…" : "▶ Predict"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Main export ───────────────────────────────────────────────────────────────
+export function ParamEditor({ editorMap, onPredict }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 10, marginBottom: 14, overflow: "hidden" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px" }}>
+        <span style={{ fontSize: 13 }}>⚙</span>
+        <span style={{ fontSize: 12, fontWeight: 500, color: "var(--color-text-primary)", flex: 1 }}>
+          Adjust parameters
+        </span>
+        <span style={{ fontSize: 10, color: "var(--color-text-tertiary)", marginRight: 8 }}>
+          Slider + số — thay đổi realtime
+        </span>
+        <button
+          onClick={() => setOpen((p) => !p)}
+          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "var(--color-text-tertiary)", padding: 0 }}
+        >
+          {open ? "▲" : "▼"}
+        </button>
+      </div>
+
+      {open && (
+        <>
           <div style={{ borderTop: "0.5px solid var(--color-border-tertiary)" }}>
             {EDITOR_MODULES.map((mod) => {
               const [vals, setVals] = editorMap[mod.key];
               return <EditorModuleSection key={mod.key} mod={mod} vals={vals} onChange={setVals} />;
             })}
           </div>
-        )}
-      </div>
-    </>
+          {/* Predict button footer — only visible when the panel is open */}
+          <PredictFooter editorMap={editorMap} onPredict={onPredict} />
+        </>
+      )}
+    </div>
   );
 }

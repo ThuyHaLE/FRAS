@@ -13,13 +13,14 @@ function useEditorVals({ ckVals, setCkVals, fgVals, setFgVals, dirVals, setDirVa
   return { ck: [ckVals, setCkVals], fg: [fgVals, setFgVals], dir: [dirVals, setDirVals], rs: [rsVals, setRsVals], tc: [tcVals, setTcVals], tm: [tmVals, setTmVals] };
 }
 
-export function OverviewPanel({ ckVals, setCkVals, fgVals, setFgVals, dirVals, setDirVals, rsVals, setRsVals, rhVals, tcVals, setTcVals, tmVals, setTmVals, eventId, onGoTab }) {
+export function OverviewPanel({ ckVals, setCkVals, fgVals, setFgVals, dirVals, setDirVals, rsVals, setRsVals, rhVals, tcVals, setTcVals, tmVals, setTmVals, eventId, onGoTab, onPredict }) {
   const editorMap = useEditorVals({ ckVals, setCkVals, fgVals, setFgVals, dirVals, setDirVals, rsVals, setRsVals, tcVals, setTcVals, tmVals, setTmVals });
 
   return (
     <div style={{ padding: "1rem 0" }}>
-      <ParamEditor editorMap={editorMap} />
-      {/* reach probability*/}
+      <ParamEditor editorMap={editorMap} onPredict={onPredict} />
+
+      {/* reach probability */}
       {rhVals && (
         <div onClick={() => onGoTab(5)} style={{ background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: 10, padding: "12px 16px", marginBottom: 14, cursor: "pointer" }}>
           <div style={{ fontSize: 12, fontWeight: 500, color: "var(--color-text-primary)", marginBottom: 10 }}>Reach probability — evac zone</div>
@@ -39,19 +40,21 @@ export function OverviewPanel({ ckVals, setCkVals, fgVals, setFgVals, dirVals, s
           </div>
         </div>
       )}
-      {/* ── CROSS-MODULE ALARMS — thêm mới ── */}
+
+      {/* cross-module alarms */}
       {ckVals && fgVals && dirVals && rsVals && tcVals && tmVals && rhVals && (
         <CrossModuleAlarms
           ckVals={ckVals} fgVals={fgVals} dirVals={dirVals}
           rsVals={rsVals} tcVals={tcVals} tmVals={tmVals} rhVals={rhVals}
         />
       )}
-      {/* temporal cards*/}
+
+      {/* temporal cards */}
       {(tcVals || tmVals) && (
-      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 14 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 14 }}>
           {tcVals && <TemporalCoverageCard vals={tcVals} />}
           {tmVals && <TemporalMetadataCard vals={tmVals} />}
-      </div>
+        </div>
       )}
     </div>
   );
