@@ -71,7 +71,7 @@ const EDITOR_MODULES = [
   },
 ];
 
-// Collect all vals from editorMap into a single flat object for submission to /api/predict
+// Collect all feature values from the editorMap into a single event object to send to the API for prediction.
 function collectEvent(editorMap) {
   const event = {
     event_id: Math.floor(Math.random() * 90_000_000) + 10_000_000, // 8-digit random
@@ -134,7 +134,7 @@ function EditorModuleSection({ mod, vals, onChange }) {
   );
 }
 
-// ── PredictFooter: display below the sliders when open ──────────────────────
+// ── PredictFooter: display below the sliders when the panel is open ──────────────────────
 function PredictFooter({ editorMap, onPredict }) {
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState(null);
@@ -153,7 +153,7 @@ function PredictFooter({ editorMap, onPredict }) {
       if (!res.ok || !data.ok) throw new Error(data.detail ?? `HTTP ${res.status}`);
       if (typeof onPredict === "function") onPredict(data.result);
     } catch (e) {
-      setError(`Lỗi predict: ${e.message}`);
+      setError(`Predict error: ${e.message}`);
     } finally {
       setLoading(false);
     }
@@ -166,7 +166,7 @@ function PredictFooter({ editorMap, onPredict }) {
       display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
     }}>
       <div style={{ fontSize: 10, color: "var(--color-text-tertiary)" }}>
-        Điều chỉnh params bên trên, rồi nhấn Predict để chạy model.
+        Params from all tabs — click Predict to run the model.
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
         {error && (
@@ -175,7 +175,7 @@ function PredictFooter({ editorMap, onPredict }) {
         {loading && (
           <span style={{ fontSize: 11, color: "var(--color-text-tertiary)" }}>
             <span style={{ display: "inline-block", animation: "spin 1s linear infinite" }}>⏳</span>
-            {" "}Đang predict…
+            {" "}Running prediction…
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </span>
         )}
@@ -209,7 +209,7 @@ export function ParamEditor({ editorMap, onPredict }) {
           Adjust parameters
         </span>
         <span style={{ fontSize: 10, color: "var(--color-text-tertiary)", marginRight: 8 }}>
-          Slider + số — thay đổi realtime
+          Slider + numbers — real-time adjustment
         </span>
         <button
           onClick={() => setOpen((p) => !p)}
@@ -227,7 +227,7 @@ export function ParamEditor({ editorMap, onPredict }) {
               return <EditorModuleSection key={mod.key} mod={mod} vals={vals} onChange={setVals} />;
             })}
           </div>
-          {/* Predict button footer — only visible when the panel is open */}
+          {/* Predict button footer — only shown when panel is open */}
           <PredictFooter editorMap={editorMap} onPredict={onPredict} />
         </>
       )}
