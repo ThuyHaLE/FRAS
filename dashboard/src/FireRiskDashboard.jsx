@@ -37,7 +37,7 @@ function ThemeToggle({ theme, setTheme }) {
   );
 }
 
-// Minimal banner to show prediction results after upload, with option to dismiss
+// Mini banner display 4 prob_ after prediction
 function PredictionBanner({ result, onDismiss }) {
   if (!result) return null;
   const PROB_KEYS = [
@@ -54,7 +54,7 @@ function PredictionBanner({ result, onDismiss }) {
     }}>
       <span style={{ fontSize: 15 }}>✅</span>
       <div style={{ fontSize: 12, fontWeight: 500, color: "var(--color-text-primary)", flexShrink: 0 }}>
-        Predict successful!
+        Predict successfully
       </div>
       <div style={{ display: "flex", gap: 16, flex: 1 }}>
         {PROB_KEYS.map(({ key, label }) => (
@@ -108,7 +108,7 @@ export default function FireRiskDashboard() {
       setRhVals(data.reachProbability);
       setTcVals(data.temporalCoverage);
       setTmVals(data.temporalMetadata);
-      setPredictionResult(null); // clear banner khi refresh
+      setPredictionResult(null);
     } catch (e) {
       setError(e.message || "Failed to load data");
     } finally {
@@ -122,8 +122,7 @@ export default function FireRiskDashboard() {
   function handlePredictionResult(result) {
     setPredictionResult(result);
 
-    // Update rhVals to RiskHorizonPanel render with new probabilities, 
-    // but keep existing values if some keys are missing in result
+    // Update rhVals to RiskHorizonPanel render with new prob_ values after prediction
     setRhVals(prev => ({
       ...prev,
       prob_h12: result.prob_h12 ?? prev?.prob_h12,
@@ -132,14 +131,14 @@ export default function FireRiskDashboard() {
       prob_h72: result.prob_h72 ?? prev?.prob_h72,
     }));
 
-    // Update eventId if provided in result, so it shows in header and OverviewPanel
+    // Update event_id on the header
     if (result.event_id != null) setEventId(result.event_id);
 
   }
 
   if (loading) return (
     <div style={{ padding: "2rem", color: "var(--color-text-tertiary)", fontSize: 13 }}>
-      Đang tải dữ liệu…
+      Uploading data… 
     </div>
   );
   if (error || !ckVals) return (
@@ -236,6 +235,7 @@ export default function FireRiskDashboard() {
             tcVals={tcVals} setTcVals={setTcVals}
             tmVals={tmVals} setTmVals={setTmVals}
             eventId={eventId} onGoTab={setActiveTab}
+            onPredict={handlePredictionResult}
           />
         )}
         {activeTab === 1 && <CentroidKinematicsPanel vals={ckVals} setVals={setCkVals} />}
