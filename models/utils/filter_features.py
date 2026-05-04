@@ -426,7 +426,7 @@ def filter_features(
             )
         wrapper = make_wrapper(model_type, all_features)
 
-    pi      = PermutationImportance(wrapper, n_repeats=n_repeats)
+    pi      = PermutationImportance(wrapper, n_repeats=n_repeats, n_jobs=1)
     summary = pi.run(train_df, all_features, enriched_features, output_path=output_path)
     return classify_features(summary, thresholds=thresholds)
 
