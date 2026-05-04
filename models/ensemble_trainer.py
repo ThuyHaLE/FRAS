@@ -11,7 +11,8 @@ from scipy.optimize import minimize
 
 from sksurv.metrics import concordance_index_censored
 from features import TARGET_EVENT_ID, TARGET_EVENT, TARGET_TIME, HORIZONS, BRIER_W, CINDEX_HORIZON, RANDOM_STATE
-from models import ModelStrategy, SurvivalTrainer, enforce_monotone, brier_matrix
+from models.strategies import ModelStrategy
+from models import SurvivalTrainer, enforce_monotone, brier_matrix
 
 # ──────────────────────────────────────────
 # Config
