@@ -158,7 +158,45 @@ Four survival analysis strategies are used, each injected via a `ModelStrategy` 
 | CoxnetSurvivalAnalysis | `CoxnetStrategy` | Regularized Cox PH, sparse features |
 | ComponentwiseGradientBoostingSurvivalAnalysis | `CGBStrategy` | Categorical-aware boosting |
 
-Custom strategies (e.g., `XGBSEDebiasedBCE`) can be registered by subclassing `ModelStrategy` and implementing `build()`, `fit()`, and `predict_survival()`.
+#### 🔌 Extensibility
+ 
+The entire pipeline — training, feature selection, and ensemble — is designed to accept any model without modifying core logic. To plug in a new model:
+ 
+**1. Implement `ModelStrategy`:**
+```python
+class XGBSEStrategy(ModelStrategy):
+    @property
+    def name(self) -> str: return "XGBSE"
+ 
+    def build(self, random_state: int): ...
+    def fit(self, model, X, y): ...
+    def predict_survival(self, model, X) -> list: ...
+```
+ 
+**2. Run feature selection with custom thresholds:**
+```python
+result = filter_features(
+    enriched_train_df,
+    base_features,
+    enriched_features,
+    strategy=XGBSEStrategy(),
+    thresholds=TierThresholds(star=0.005, tier2=0.0005, noise_ratio=4.0),
+    n_repeats=10,
+)
+xgb_features = result["survival_features"]
+```
+ 
+**3. Drop into the ensemble — no other changes needed:**
+```python
+configs = [
+    TrainerConfig("RSF",  RSFStrategy(),   multi["rsf"]),
+    TrainerConfig("GB",   GradBoostStrategy(), multi["gradboost"]),
+    TrainerConfig("XGBSE", XGBSEStrategy(), xgb_features),  # ← new
+]
+ensemble = EnsembleTrainer(configs)
+```
+ 
+This makes it straightforward to experiment with new survival models (e.g. `XGBSEDebiasedBCE`, DeepSurv) or tune `TierThresholds` per model without touching the training or evaluation pipeline.
 
 ---
 
@@ -222,6 +260,64 @@ WBS = 0.3 × Brier@24h + 0.4 × Brier@48h + 0.3 × Brier@72h
 ```
 
 > **Note:** `@12h` is predicted by the model but excluded from WBS. The metric focuses on the 24–72h window where operational value is highest: `@48h` carries the most weight as it balances actionable lead time with decision urgency; `@72h` is included for extended planning but is less operationally immediate; `@12h` offers too short a lead time to meaningfully inform evacuation decisions.
+
+---
+ 
+## 📈 Results
+ 
+### Base Features (34 features)
+ 
+| Model | CV Hybrid Score | OOF Hybrid Score | Public LB |
+|---|---|---|---|
+| RSF | 0.9315 ± 0.0094 | 0.9290 | 0.89954 |
+| GB | 0.9728 ± 0.0041 | 0.9724 | 0.96382 |
+| Coxnet | 0.8071 ± 0.1336 | 0.8244 | 0.89657 |
+| CGB | 0.8943 ± 0.0148 | 0.8888 | 0.86591 |
+| Ensemble 2 models (RSF=0.304, GB=0.696) | — | 0.9701 | 0.96124 |
+| Ensemble 4 models (GB=0.804, CGB=0.167, Coxnet=0.029) | — | 0.9709 | 0.96331 |
+ 
+### Enriched Features + Per-Model Feature Selection
+ 
+Selected features per model:
+ 
+**RSF** (14 features): `log1p_dist_min`, `eta_along_track`, `eta_projected`, `eta_closing`, `eta_aligned_along`, `eta_radial`, `eta_combined`, `eta_bearing_adjusted`, `alignment_x_nperim`, `dt_first_last_0_5h`, `alignment_abs`, `dt_x_alignment`, `dist_per_area`, `low_temporal_resolution_0_5h`
+ 
+**GB** (7 features): `log1p_dist_min`, `eta_closing`, `dist_per_area`, `eta_aligned_along`, `dt_first_last_0_5h`, `eta_projected`, `eta_along_track`
+ 
+**Coxnet** (28 features): `log1p_dist_min`, `num_perimeters_0_5h`, `dist_per_area`, `log1p_area_first`, `dt_first_last_0_5h`, `alignment_abs`, `area_speed_ratio`, `eta_closing`, `alignment_x_nperim`, `dist_fit_r2_0_5h`, `dist_cv`, `cross_track_component`, `eta_projected`, `reliable_accel`, `dt_x_alignment`, `dist_change_norm`, `directional_growth`, `log1p_reliable_slope`, `dist_slope_ci_0_5h`, `growth_pressure`, `spread_bearing_sin`, `area_first_ha`, `low_temporal_resolution_0_5h`, `event_start_month`, `reliable_eta_ci`, `spread_bearing_deg`, `linear_eta_ci`, `is_approaching`
+ 
+**CGB** (6 features): `log1p_dist_min`, `eta_closing`, `alignment_abs`, `eta_combined`, `eta_aligned_along`, `cross_track_component`
+ 
+| Model | CV Hybrid Score | OOF Hybrid Score | Public LB |
+|---|---|---|---|
+| RSF | 0.9737 ± 0.0061 | 0.9711 | 0.96270 |
+| GB | 0.9736 ± 0.0063 | 0.9715 | 0.96377 |
+| Coxnet | 0.9127 ± 0.0412 | 0.9121 | 0.90317 |
+| CGB | 0.9581 ± 0.0085 | 0.9560 | 0.93059 |
+| Ensemble 2 models (RSF=0.500, GB=0.500) | — | 0.9689 | **0.96448** |
+| Ensemble 4 models (RSF=0.000, GB=0.772, CGB=0.000, Coxnet=0.228) | — | 0.9698 | 0.96253 |
+ 
+### Key Observations
+ 
+**Base features → CV inflated, LB drops (RSF):** RSF on base features achieves CV 0.9315 but drops to 0.8995 on public LB — a gap of ~0.03. This is consistent with the observational bias hypothesis: `dist_min_ci_0_5h` and temporal coverage features produce clean CV signal but do not generalise well.
+ 
+**Enriched features → stable generalisation:** After replacing raw distance with compound physics-based features, RSF CV improves to 0.9737 and LB closes to 0.9627 — CV/LB gap shrinks from ~0.03 to ~0.01. This validates the design decision to remove `dist_min_ci_0_5h` from base features and re-encode distance as ETA and threat features.
+ 
+**Coxnet and CGB underperform consistently:** Despite feature selection, both models lag significantly behind RSF and GB — Coxnet by ~0.06 LB points and CGB by ~0.03. Coxnet also shows high CV variance (±0.04), indicating instability. Adding them to the ensemble does not improve LB: on base features the optimizer nearly zeros out both (Coxnet=0.029, CGB=0.167, RSF=0.000); on enriched features Coxnet receives a more substantial weight (0.228), yet the 4-model ensemble still scores 0.9625 vs 0.9645 for RSF+GB only — indicating that Coxnet does not add complementary signal but instead dilutes GB's predictions.
+ 
+**Ensemble → lower CV, higher LB:** The final RSF+GB ensemble OOF score (0.9689) is slightly below individual models, but public LB (0.9645) exceeds both. Blending reduces individual model overfit and calibration corrects the probability scale — consistent with the classic CV/LB trade-off of ensemble methods.
+ 
+**Limitations and future directions:** Feature enrichment improves all models on CV, but the gains do not translate equally across models or to ensemble diversity. A few specific observations:
+ 
+**GB enrichment is marginal:** GB base (LB 0.96382) and GB enriched (LB 0.96377) are nearly identical, suggesting GB already saturates on the core ETA + distance signal and enrichment adds little beyond what the base features capture.
+  
+**Linear models struggle with non-linear features:** The engineered features are predominantly non-linear transformations (ETA ratios, log-compressed speeds, trigonometric bearing terms) — tree-based models (RSF, GB) exploit these directly, but Coxnet requires 28 features after selection yet still underperforms, likely because these transformations do not align with its linear proportional-hazard assumption.
+
+**Feature selection thresholds are fixed and may not be optimal:** `TierThresholds` uses fixed importance cutoffs (`star=0.005`, `tier2=0.0005`, `noise_ratio=5.0`) tuned for small datasets. Since Coxnet's permutation importance scale is ~10–30× larger than tree-based models, it uses separate `COXNET_THRESHOLDS` — but both are manually set and could benefit from cross-validated threshold search.
+
+**`enrich_features` is a fixed pipeline:** All feature groups are computed unconditionally and several internal constants (`SLOPE_THRESHOLD = -0.1`, `MAX_ETA_HOURS = 500`, `EPS = 0.01`) are hardcoded magic numbers. These could be tuned — for instance, tightening `SLOPE_THRESHOLD` to filter out noisy ETA estimates, or adding new feature groups (e.g. weather × terrain interactions) — without changing anything else in the pipeline.
+
+A natural next step would be to include non-linear models with different inductive biases — such as `XGBSEDebiasedBCE` (already implemented in this repo) or neural survival models (e.g. DeepSurv) — which may capture interaction patterns that RSF and GB miss, and could add genuine diversity to the ensemble beyond what Coxnet/CGB offer.
 
 ---
 
