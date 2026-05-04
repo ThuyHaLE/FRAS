@@ -1,3 +1,5 @@
+#models/utils/filter_features.py
+
 from __future__ import annotations
 
 import copy
@@ -13,7 +15,8 @@ from typing import Any
 from joblib import Parallel, delayed
 from sklearn.model_selection import StratifiedKFold
 
-from models import ModelStrategy, SurvivalTrainer, enforce_monotone
+from models.strategies import ModelStrategy
+from models.survival_model import SurvivalTrainer, enforce_monotone
 from features import TARGET_EVENT, TARGET_TIME
 
 # ──────────────────────────────────────────────────────────────

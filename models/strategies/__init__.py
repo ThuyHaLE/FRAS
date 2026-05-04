@@ -1,3 +1,5 @@
+# models/strategies/__init__.py
+
 from .base import ModelStrategy
 from .builtin import RSFStrategy, GradBoostStrategy, CoxnetStrategy, CGBStrategy
 

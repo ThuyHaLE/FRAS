@@ -1,3 +1,5 @@
+# models/__init__.py
+
 from models.survival_model import SurvivalTrainer, enforce_monotone, brier_matrix
 from models.ensemble_trainer import EnsembleTrainer, TrainerConfig
 
