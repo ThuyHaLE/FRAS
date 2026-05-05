@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import warnings
 import itertools
 import numpy as np
@@ -86,12 +87,22 @@ class EnsembleTrainer:
         ensemble.cross_validate(train_df)
         ensemble.optimize_weights(train_df, strategy="scipy")
         ensemble.fit(train_df)
-        df_sub = ensemble.make_submission(test_df)
+        ensemble.save_checkpoint("checkpoints/ensemble_v1.pkl")
+
+        # Later — fast inference:
+        ensemble = EnsembleTrainer.load_checkpoint("checkpoints/ensemble_v1.pkl")
+        df_sub   = ensemble.make_submission(test_df)
     """
 
     HORIZONS       = HORIZONS
     BRIER_W        = BRIER_W
     CINDEX_HORIZON = CINDEX_HORIZON
+
+    # Attributes that must NOT be overridden after fitting
+    _PROTECTED_ATTRS = frozenset({
+        "_trainers", "calibrators", "oof_raw", "oof_cal",
+        "cv_score", "ensemble_weights",
+    })
 
     def __init__(
         self,
@@ -151,6 +162,80 @@ class EnsembleTrainer:
     @property
     def _n_models(self) -> int:
         return len(self._trainers)
+
+    # ──────────────────────────────────────────
+    # Checkpoint
+    # ──────────────────────────────────────────
+    def save_checkpoint(self, path: str) -> None:
+        """Persist the fitted ensemble to disk via joblib."""
+        try:
+            import joblib
+        except ImportError:
+            raise ImportError("joblib not installed: pip install joblib")
+
+        if not self.is_fitted():
+            raise RuntimeError(
+                "Not fitted yet. Call cross_validate() + fit() before saving."
+            )
+
+        os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+        joblib.dump(self, path, compress=3)
+
+        if self.verbose:
+            size_mb = os.path.getsize(path) / 1024 / 1024
+            tags    = [tag for tag, _ in self._trainers]
+            print(f"[checkpoint] Saved → {path}  ({size_mb:.1f} MB)")
+            print(f"[checkpoint] models={tags}  weights={self.ensemble_weights}")
+
+    @classmethod
+    def load_checkpoint(
+        cls,
+        path: str,
+        override: Optional[Dict[str, Any]] = None,
+        verbose: bool = True,
+    ) -> "EnsembleTrainer":
+        """
+        Load a saved EnsembleTrainer checkpoint.
+
+        Parameters
+        ----------
+        path     : Path to .pkl file saved by save_checkpoint().
+        override : Optional dict of non-protected attributes to overwrite
+                   after loading (e.g. {"verbose": False}).
+        verbose  : Print summary after loading.
+        """
+        try:
+            import joblib
+        except ImportError:
+            raise ImportError("joblib not installed: pip install joblib")
+
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"Checkpoint not found: {path}")
+
+        ensemble = joblib.load(path)
+
+        if not isinstance(ensemble, cls):
+            warnings.warn(
+                f"Checkpoint contains {type(ensemble).__name__}, expected EnsembleTrainer.",
+                UserWarning,
+            )
+
+        if override:
+            blocked = set(override) & cls._PROTECTED_ATTRS
+            if blocked:
+                raise ValueError(f"Cannot override fitted state: {sorted(blocked)}")
+            for k, v in override.items():
+                setattr(ensemble, k, v)
+
+        if verbose:
+            size_mb = os.path.getsize(path) / 1024 / 1024
+            tags    = [tag for tag, _ in ensemble._trainers]
+            print(f"[checkpoint] Loaded ← {path}  ({size_mb:.1f} MB)")
+            print(f"[checkpoint] models={tags}  weights={ensemble.ensemble_weights}")
+            if ensemble.cv_score is not None:
+                print(f"[checkpoint] CV Score={ensemble.cv_score:.4f}")
+
+        return ensemble
 
     # ──────────────────────────────────────────
     # Helpers
@@ -223,6 +308,15 @@ class EnsembleTrainer:
             all(t.is_fitted() for _, t in self._trainers)
             and self.calibrators is not None
         )
+
+    def summary(self) -> None:
+        """Print a summary of the ensemble state."""
+        tags = [tag for tag, _ in self._trainers]
+        print(f"EnsembleTrainer  n_models={self._n_models}  horizons={self.horizons}")
+        print(f"  fitted   : {self.is_fitted()}  cv_score : {self.cv_score}")
+        print(f"  weights  : { {t: round(w, 4) for t, w in zip(tags, self._normalized_weights())} }")
+        for tag, trainer in self._trainers:
+            print(f"  [{tag}]  {trainer.strategy.summary_str()}  cv={trainer.cv_score}")
 
     # ──────────────────────────────────────────
     # Cross-validation
