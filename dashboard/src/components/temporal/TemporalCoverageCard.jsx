@@ -16,8 +16,8 @@ export function TemporalCoverageCard({ vals }) {
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {[
-          { label: "num_perimeters_0_5h", desc: "Số perimeter trong 5h đầu",          val: vals.num_perimeters_0_5h,  fmt: (v) => v },
-          { label: "dt_first_last_0_5h",  desc: "Khoảng thời gian first–last perimeter", val: vals.dt_first_last_0_5h, fmt: (v) => v.toFixed(1) + " h" },
+          { label: "num_perimeters_0_5h", desc: "Number of perimeters within first 5 hours", val: vals.num_perimeters_0_5h,  fmt: (v) => v },
+          { label: "dt_first_last_0_5h",  desc: "Time span between first and last perimeter (hours)", val: vals.dt_first_last_0_5h, fmt: (v) => v.toFixed(1) + " h" },
         ].map(({ label, desc, val, fmt }) => (
           <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
@@ -30,7 +30,7 @@ export function TemporalCoverageCard({ vals }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--color-text-secondary)" }}>low_temporal_resolution_0_5h</div>
-            <div style={{ fontSize: 10, color: "var(--color-text-tertiary)", marginTop: 1 }}>Flag: dt &lt; 0.5h hoặc chỉ 1 perimeter</div>
+            <div style={{ fontSize: 10, color: "var(--color-text-tertiary)", marginTop: 1 }}>Flag, 1 if dt &lt; 0.5h or only 1 perimeter, else 0</div>
           </div>
           <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 8px", borderRadius: 3, background: "var(--color-background-secondary)", color: "var(--color-text-secondary)", fontFamily: "var(--font-mono)" }}>
             {vals.low_temporal_resolution_0_5h} — {isLowRes ? "YES" : "NO"}

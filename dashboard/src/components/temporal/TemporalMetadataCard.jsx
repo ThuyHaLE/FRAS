@@ -22,7 +22,7 @@ export function TemporalMetadataCard({ vals }) {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
             <div>
               <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--color-text-secondary)" }}>event_start_hour</div>
-              <div style={{ fontSize: 10, color: "var(--color-text-tertiary)", marginTop: 1 }}>Giờ bắt đầu (0–23)</div>
+              <div style={{ fontSize: 10, color: "var(--color-text-tertiary)", marginTop: 1 }}>Hour of day when fire started (0-23)</div>
             </div>
             <div style={{ textAlign: "right" }}>
               <span style={{ fontSize: 20, fontWeight: 500, color: "var(--color-text-primary)", fontFamily: "var(--font-mono)" }}>{String(hour).padStart(2, "0")}:00</span>
@@ -39,7 +39,7 @@ export function TemporalMetadataCard({ vals }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--color-text-secondary)" }}>event_start_dayofweek</div>
-            <div style={{ fontSize: 10, color: "var(--color-text-tertiary)", marginTop: 1 }}>0 = Mon, 6 = Sun</div>
+            <div style={{ fontSize: 10, color: "var(--color-text-tertiary)", marginTop: 1 }}>Day of week (0 = Monday, 6 = Sunday)</div>
           </div>
           <div style={{ display: "flex", gap: 3 }}>
             {DOW_LABELS.map((d, i) => (
@@ -50,7 +50,7 @@ export function TemporalMetadataCard({ vals }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--color-text-secondary)" }}>event_start_month</div>
-            <div style={{ fontSize: 10, color: "var(--color-text-tertiary)", marginTop: 1 }}>Tháng bắt đầu (1–12)</div>
+            <div style={{ fontSize: 10, color: "var(--color-text-tertiary)", marginTop: 1 }}>Month when fire started (1-12)</div>
           </div>
           <div style={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "flex-end", maxWidth: 200 }}>
             {MONTH_LABELS.map((m, i) => (
