@@ -36,7 +36,7 @@ const MOCK_DATA = {
     projected_advance_m: 0.0, closing_speed_abs_m_per_h: 0.0, dist_fit_r2_0_5h: 0.0,
   },
   reachProbability: {
-    prob_h12: 0.666636, prob_h24: 0.860151, prob_h48: 0.860151, prob_h72: 0.939452,
+    prob_12h: 0.666636, prob_24h: 0.860151, prob_48h: 0.860151, prob_72h: 0.939452,
   },
   temporalCoverage: {
     num_perimeters_0_5h: 12, dt_first_last_0_5h: 3.7474164763888886, low_temporal_resolution_0_5h: 0.0,

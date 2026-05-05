@@ -41,10 +41,10 @@ function ThemeToggle({ theme, setTheme }) {
 function PredictionBanner({ result, onDismiss }) {
   if (!result) return null;
   const PROB_KEYS = [
-    { key: "prob_h12", label: "12 h" },
-    { key: "prob_h24", label: "24 h" },
-    { key: "prob_h48", label: "48 h" },
-    { key: "prob_h72", label: "72 h" },
+    { key: "prob_12h", label: "12h" },
+    { key: "prob_24h", label: "24h" },
+    { key: "prob_48h", label: "48h" },
+    { key: "prob_72h", label: "72h" },
   ];
   return (
     <div style={{
@@ -118,17 +118,17 @@ export default function FireRiskDashboard() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // submission shape: { event_id, prob_h12, prob_h24, prob_h48, prob_h72 }
+  // submission shape: { event_id, prob_12h, prob_24h, prob_48h, prob_72h }
   function handlePredictionResult(result) {
     setPredictionResult(result);
 
     // Update rhVals to RiskHorizonPanel render with new prob_ values after prediction
     setRhVals(prev => ({
       ...prev,
-      prob_h12: result.prob_h12 ?? prev?.prob_h12,
-      prob_h24: result.prob_h24 ?? prev?.prob_h24,
-      prob_h48: result.prob_h48 ?? prev?.prob_h48,
-      prob_h72: result.prob_h72 ?? prev?.prob_h72,
+      prob_12h: result.prob_12h ?? prev?.prob_12h,
+      prob_24h: result.prob_24h ?? prev?.prob_24h,
+      prob_48h: result.prob_48h ?? prev?.prob_48h,
+      prob_72h: result.prob_72h ?? prev?.prob_72h,
     }));
 
     // Update event_id on the header

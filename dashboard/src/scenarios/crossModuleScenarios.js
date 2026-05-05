@@ -85,20 +85,20 @@ export function scenarioContainmentDifficulty(fgVals, rsVals, rhVals) {
   const sizeScore  = clamp01(Math.log1p(v.area_first_ha) / 9.4);
   const growthScore = clamp01(Math.sqrt(v.area_growth_rate_ha_per_h / 525));
   const proxScore  = clamp01(1 - Math.pow(v.dist_min_ci_0_5h / 800000, 0.5));
-  const probScore  = clamp01(v.prob_h24);
+  const probScore  = clamp01(v.prob_24h);
   const combined   = clamp01(0.3 * sizeScore + 0.25 * growthScore + 0.2 * proxScore + 0.25 * probScore);
   const level      = alarmLevel(combined);
   return {
     title: "Containment difficulty",
     subtitle: "fire size + growth rate + proximity + reach probability → overall suppression challenge",
-    sources: ["area_first_ha","area_growth_rate_ha_per_h","dist_min_ci_0_5h","prob_h24"],
+    sources: ["area_first_ha","area_growth_rate_ha_per_h","dist_min_ci_0_5h","prob_24h"],
     accentColor: "#5B8DD9",
     overallScore: combined,
     signals: [
       { name: "fire size",      value: sizeScore,   hint: `${v.area_first_ha.toFixed(0)} ha — ${v.area_first_ha > 1000 ? "large" : v.area_first_ha > 100 ? "medium" : "small"} fire` },
       { name: "growth rate",    value: growthScore, hint: `${v.area_growth_rate_ha_per_h.toFixed(2)} ha/h expansion` },
       { name: "zone proximity", value: proxScore,   hint: `${(v.dist_min_ci_0_5h / 1000).toFixed(1)} km to nearest evac zone` },
-      { name: "24h reach prob", value: probScore,   hint: `${Math.round(v.prob_h24 * 100)}% probability within 24h` },
+      { name: "24h reach prob", value: probScore,   hint: `${Math.round(v.prob_24h * 100)}% probability within 24h` },
     ],
     summary: { ok: "Containment difficulty is manageable — fire is not large or fast-growing.", watch: "Elevated containment difficulty — fire size and reach probability require active resources.", alarm: "Very high containment difficulty — large, fast-growing fire with high reach probability." }[level],
   };

@@ -69,10 +69,10 @@ export const THEMES = {
 };
 
 export const RH_HORIZONS = [
-  { key: "prob_h12", label: "12 hours", short: "prob_12h" },
-  { key: "prob_h24", label: "24 hours", short: "prob_24h" },
-  { key: "prob_h48", label: "48 hours", short: "prob_48h" },
-  { key: "prob_h72", label: "72 hours", short: "prob_72h" },
+  { key: "prob_12h", label: "12 hours", short: "prob_12h" },
+  { key: "prob_24h", label: "24 hours", short: "prob_24h" },
+  { key: "prob_48h", label: "48 hours", short: "prob_48h" },
+  { key: "prob_72h", label: "72 hours", short: "prob_72h" },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════
