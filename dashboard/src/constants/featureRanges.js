@@ -14,7 +14,7 @@ export const FEATURE_RANGES = {
   log1p_growth:                 { min: 0,     max: 7.9,    step: 0.01  },
   area_growth_rel_0_5h:         { min: 0,     max: 20,     step: 0.01  },
   relative_growth_0_5h:         { min: 0,     max: 20,     step: 0.01  },
-  log_area_ratio_0_5h:          { min: 0,     max: 3.0,    step: 0.01  },
+  log_area_ratio_0_5h:          { min: -1,     max: 3.0,    step: 0.01  },
   area_growth_rate_ha_per_h:    { min: 0,     max: 525,    step: 0.5   },
   radial_growth_m:              { min: 0,     max: 1400,   step: 1     },
   radial_growth_rate_m_per_h:   { min: 0,     max: 360,    step: 1     },

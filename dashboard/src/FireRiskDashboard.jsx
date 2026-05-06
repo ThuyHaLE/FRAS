@@ -136,6 +136,18 @@ export default function FireRiskDashboard() {
 
   }
 
+  function handleUploadApply(features, result) {
+    handlePredictionResult(result);
+
+    // Mỗi setter chỉ nhận các key nó đang giữ, spread features vào
+    setCkVals(prev => ({ ...prev, ...features }));
+    setFgVals(prev => ({ ...prev, ...features }));
+    setDirVals(prev => ({ ...prev, ...features }));
+    setRsVals(prev => ({ ...prev, ...features }));
+    setTcVals(prev => ({ ...prev, ...features }));
+    setTmVals(prev => ({ ...prev, ...features }));
+  }
+
   if (loading) return (
     <div style={{ padding: "2rem", color: "var(--color-text-tertiary)", fontSize: 13 }}>
       Uploading data… 
@@ -247,7 +259,7 @@ export default function FireRiskDashboard() {
 
       {showUpload && (
         <JsonUploadModal
-          onApply={handlePredictionResult}
+          onApply={handleUploadApply}
           onClose={() => setShowUpload(false)}
         />
       )}

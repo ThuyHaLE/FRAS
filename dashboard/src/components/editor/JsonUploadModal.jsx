@@ -43,7 +43,7 @@ export function JsonUploadModal({ onApply, onClose }) {
       if (!res.ok || !data.ok) {
         throw new Error(data.detail ?? `HTTP ${res.status}`);
       }
-      onApply(data.result);   // transfer prediction to dashboard
+      onApply(parsed, data.result);   // transfer prediction to dashboard
       onClose();
     } catch (e) {
       setError(`Predict error: ${e.message}`);
