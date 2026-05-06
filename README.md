@@ -350,34 +350,66 @@ Selected features per model: **RSF** (14): `log1p_dist_min`, `eta_along_track`, 
 A natural next step would be to include non-linear models with different inductive biases — such as `XGBSEDebiasedBCE` (already implemented in this repo) or neural survival models (e.g. DeepSurv) — which may capture interaction patterns that RSF and GB miss, and could add genuine diversity to the ensemble beyond what Coxnet/CGB offer.
 
 ---
-
-## 🗂️ Repository Structure
-
-```
-FRAS/
-├── data/
-│   ├── train.csv
-│   └── test.csv
-├── features/
-│   ├── __init__.py
-│   ├── base.py                  # BASE_FEATURES, HORIZONS, BRIER_W, CINDEX_HORIZON, RANDOM_STATE
-│   └── target.py                # TARGET_TIME, TARGET_EVENT
-├── models/
-│   ├── __init__.py              # SurvivalTrainer, EnsembleTrainer, TrainerConfig
-│   ├── strategies/
-│   │   ├── __init__.py
-│   │   ├── base.py              # ModelStrategy
-│   │   └── builtin.py           # RSFStrategy, GradBoostStrategy, ...
-│   ├── ensemble_trainer.py
-│   ├── survival_model.py
-│   ├── quickstart.ipynb         # End-to-end usage examples
-│   └── utils/
-│       ├── enrich_features.py   # Feature engineering pipeline
-│       └── filter_features.py   # PermutationImportance, filter_features, TierThresholds
-├── FRAS_demo.ipynb              # web-based demo version
-├── requirements.txt
-└── README.md
-```
+ 
+## 🖥️ Interactive Risk Dashboard (FRAS Dashboard)
+ 
+The repository includes a React-based dashboard (`dashboard/`) that goes well beyond displaying raw model probabilities. While the model outputs `prob_12h / 24h / 48h / 72h`, the dashboard layers on a set of **interpretable alarm signals** computed directly from input features — giving emergency managers actionable insight into *why* a fire is risky, not just *how likely* it is to reach a zone.
+ 
+### 1. Why alarms complement model predictions
+ 
+Survival probabilities answer "will this fire reach a zone within H hours?" but are silent on mechanism. Two fires with `prob_24h = 0.72` can be very different situations:
+ 
+- One is a slow-moving large fire already 3 km away with high trajectory confidence
+- The other is a small fast-moving fire 15 km away that just entered a blowup phase
+ 
+The alarm system captures these distinctions through feature-level signals that the model internally uses but does not surface to the user.
+ 
+### 2. Module-level alarms
+ 
+Each tab in the dashboard computes an **overall alarm score ∈ [0, 1]** and a level (`OK` / `WATCH` / `ALARM`) from the features in that module:
+ 
+| Module | Alarm | What it captures |
+|--------|-------|-----------------|
+| **Centroid Kinematics** | `useCkAlarm` | Fire centroid speed and total displacement — whether the fire is actively moving across terrain. Includes a fast-path that triggers on speed alone, before displacement accumulates. |
+| **Fire Growth** | `useFgAlarm` | Absolute size, growth rate (sqrt-scaled), and relative burst (log area ratio) — distinguishes slow large fires from fast small ones. |
+| **Directionality** | `useDirAlarm` | Bearing alignment toward evac zones, cross-track drift, and along-track approach speed. Gated: if `alignment_cos < 0.15` (fire moving roughly perpendicular), the alarm is suppressed entirely. |
+| **Proximity** | `useRsAlarm` | Distance-to-zone composite (proximity + projected advance), approach rate weighted by R² confidence, and acceleration signal. Negative `dist_accel` (fire speeding up toward zones) is surfaced as a distinct sub-signal. |
+ 
+All normalization ceilings come from `FEATURE_RANGES` — no hardcoded magic numbers — so alarm scores stay calibrated when ranges are updated from new data.
+ 
+### 3. Cross-module scenario alarms
+ 
+The **Alarms tab** (Overview panel) synthesises signals across modules into 13 higher-level scenarios. Each scenario is designed to capture a distinct behavioral or operational axis that no single module alarm covers:
+ 
+| # | Scenario | Question answered | Key signals |
+|---|----------|-------------------|-------------|
+| 1 | **Data sparsity risk** | Can we trust the other alarms right now? | Temporal coverage flag, R² noise, perimeter count, observation span |
+| 2 | **Containment difficulty** | How hard will this fire be to suppress? | Growth rate + 24h reach probability + size + proximity |
+| 3 | **Projected advance risk** | How much of the safety buffer has been consumed? | Observed advance ÷ remaining distance (buffer ratio) + closing speed |
+| 4 | **Time-to-reach estimate** | How soon could fire reach the nearest evac zone? | Effective closing speed (centroid speed × alignment) → ETA in hours |
+| 5 | **Ignition timing risk** | Did the fire start when environmental conditions favor spread? | Diurnal window (RH trough / peak wind hours) × growth rate × detection quality |
+| 6 | **Off-hours response risk** | Are suppression resources constrained by time / day of week? | Night hours (aerial ops unavailable) × weekend staffing × growth urgency |
+| 7 | **Relative growth intensity** | Is this fire exploding relative to its starting size? | Log area ratio + radial expansion + relative fraction — catches small fires that have 5–10× multiplied |
+| 8 | **Surge / blowup risk** | Is the fire entering a runaway phase right now? | Area growth acceleration + closing acceleration + centroid speed, discounted by data quality |
+| 9 | **Directional spread pressure** | How much force is the fire exerting toward zones? | Radial expansion × bearing alignment × fire size |
+| 10 | **Front fragmentation** | Is this a coherent single front or a multi-flank event? | Perimeter distance spread (σ) × radial width × relative growth |
+| 11 | **Approach consistency** | Is the closing signal steady or erratic? | Closing slope gates the score — R² and front coherence only amplify if fire is actually approaching |
+| 12 | **Trajectory confidence** | How reliably is the fire closing in on zones? | R² fit quality × negative slope × closing acceleration × data density |
+| 13 | **Flanking threat** | Is the fire threatening zones off its main axis? | Lateral drift × radial expansion, size-amplified — small fires have limited flank reach regardless |
+ 
+Scenario ordering is intentional: **data quality first** (scenario 1 primes the reader to weight downstream signals appropriately), then operational impact, ignition context, fire behavior, and directional threat.
+ 
+### 4. Parameter editor & live prediction
+ 
+The dashboard includes a collapsible **Param Editor** panel (available on the Overview tab) that lets power users:
+ 
+- Adjust any feature value via slider or numeric input in real time
+- Derived features (log transforms, bearing sin/cos, `low_temporal_resolution` flag) are auto-computed as dependencies change
+- Click **▶ Predict** to send the current feature state to the `/api/predict` endpoint and update all alarm signals and probability displays simultaneously
+  
+This makes it straightforward to test hypothetical scenarios — e.g. "what happens to the alarms if closing speed doubles?" or "how does the trajectory confidence change when R² drops from 0.8 to 0.3?" — without touching any model code.
+ 
+A separate **Upload & Predict** modal accepts a raw JSON event object, runs prediction, and hydrates all dashboard panels at once.
 
 ---
 
@@ -409,6 +441,42 @@ df_sub = trainer.make_submission(test_df)
 **3. Full pipeline (enrich → select → ensemble):**
 
 See [`quickstart`](models/quickstart.ipynb) for the complete end-to-end walkthrough.
+
+**4. Interactive dashboard demo:**
+```bash
+jupyter notebook FRAS_demo.ipynb
+```
+Runs a self-contained notebook that launches the full FRAS dashboard — all alarm signals, cross-module scenarios, and the parameter editor — without needing a separate frontend build step.
+
+---
+
+## 🗂️ Repository Structure
+
+```
+FRAS/
+├── data/
+│   ├── train.csv
+│   └── test.csv
+├── features/
+│   ├── __init__.py
+│   ├── base.py                  # BASE_FEATURES, HORIZONS, BRIER_W, CINDEX_HORIZON, RANDOM_STATE
+│   └── target.py                # TARGET_TIME, TARGET_EVENT
+├── models/
+│   ├── __init__.py              # SurvivalTrainer, EnsembleTrainer, TrainerConfig
+│   ├── strategies/
+│   │   ├── __init__.py
+│   │   ├── base.py              # ModelStrategy
+│   │   └── builtin.py           # RSFStrategy, GradBoostStrategy, ...
+│   ├── ensemble_trainer.py
+│   ├── survival_model.py
+│   ├── quickstart.ipynb         # End-to-end usage examples
+│   └── utils/
+│       ├── enrich_features.py   # Feature engineering pipeline
+│       └── filter_features.py   # PermutationImportance, filter_features, TierThresholds
+├── FRAS_demo.ipynb              # interactive dashboard demo — run to launch full FRAS UI
+├── requirements.txt
+└── README.md
+```
 
 ---
 
