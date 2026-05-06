@@ -504,8 +504,8 @@ export function scenarioFrontFragmentation(rsVals, fgVals) {
 // Distinct from scenarioIgnitionTiming: this captures institutional/resource capacity,
 // not environmental fuel conditions.
 
-export function scenarioOffHoursResponseRisk(fgVals, tcVals) {
-  const v    = { ...fgVals, ...tcVals };
+export function scenarioOffHoursResponseRisk(fgVals, tcVals, tmVals) {
+  const v = { ...fgVals, ...tcVals, ...tmVals };
   const hour = v.event_start_hour;
   const dow  = v.event_start_dayofweek; // 0 = Monday … 6 = Sunday
 

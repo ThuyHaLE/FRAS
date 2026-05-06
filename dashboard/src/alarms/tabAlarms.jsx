@@ -321,7 +321,7 @@ export function CrossModuleAlarms({ ckVals, fgVals, dirVals, rsVals, tcVals, tmV
     
     // ── Ignition context
     scenarioIgnitionTiming(fgVals, tcVals),
-    scenarioOffHoursResponseRisk(fgVals, tcVals),
+    scenarioOffHoursResponseRisk(fgVals, tcVals, tmVals),
 
     // ── Fire behavior
     scenarioRelativeGrowthIntensity(fgVals),
