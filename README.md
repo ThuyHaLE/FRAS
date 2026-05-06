@@ -499,6 +499,8 @@ FRAS/
 
 ## 📅 Timeline
 
-* Start: Jan 28, 2026
+* Competition start: Jan 28, 2026
 * Entry Deadline: Apr 24, 2026
 * Final Submission: May 1, 2026
+  
+* Personal: built end-to-end from Apr 16 to May 6, 2026
