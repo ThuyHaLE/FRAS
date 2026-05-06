@@ -333,7 +333,7 @@ export function scenarioIgnitionTiming(fgVals, tcVals, tmVals) {
                   : 0.0;
 
   // Growth rate proxies for "are current fuel/wind conditions actually supporting spread"
-  const growthNorm       = clamp01(Math.sqrt(v.area_growth_rate_ha_per_h / 525));
+  const growthNorm = clamp01(Math.sqrt(v.area_growth_rate_ha_per_h / R("area_growth_rate_ha_per_h").max));
   const detectionPenalty = v.low_temporal_resolution_0_5h === 1 ? 0.3 : 0.0;
 
   // Max of diurnal and night: they are separate concerns, not additive
@@ -378,7 +378,7 @@ export function scenarioRelativeGrowthIntensity(fgVals) {
 
   // log_area_ratio = log(area_final / area_first); negative if fire shrank (noise/correction)
   const logRatio       = v.log_area_ratio_0_5h ?? 0;
-  const relGrowthScore = clamp01(nn(logRatio) / Math.log(20)); // ceiling: 20× expansion
+  const relGrowthScore = clamp01(nn(logRatio) / R("log_area_ratio_0_5h").max);
 
   // Radial growth in absolute meters; ceiling ~2 km for extreme events
   const radialScore    = clamp01(nn(v.radial_growth_m) / R("radial_growth_m").max);
@@ -423,7 +423,7 @@ export function scenarioProjectedAdvance(rsVals) {
 
   // projected_advance_m = d0 − d5; negative means fire retreated — treat as 0
   const advance      = nn(v.projected_advance_m);
-  const advanceScore = clamp01(advance / 50000); // ceiling: 50 km advance in obs window
+  const advanceScore = clamp01(advance / R("projected_advance_m").max);
 
   // Buffer ratio: what fraction of the remaining distance has already been consumed
   const bufferRatio  = v.dist_min_ci_0_5h > 0
@@ -521,7 +521,7 @@ export function scenarioOffHoursResponseRisk(fgVals, tcVals, tmVals) {
                      : 0.1;
 
   // Growth rate: faster fire = the resource gap matters more
-  const growthNorm  = clamp01(Math.sqrt(v.area_growth_rate_ha_per_h / 525));
+  const growthNorm = clamp01(Math.sqrt(v.area_growth_rate_ha_per_h / R("area_growth_rate_ha_per_h").max));
   const timePenalty = clamp01(Math.max(nightPenalty, weekendScore));
 
   // Interaction term: simultaneous night + weekend + rapid growth is worse than sum of parts
