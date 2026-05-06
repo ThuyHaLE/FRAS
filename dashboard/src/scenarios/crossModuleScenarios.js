@@ -318,8 +318,8 @@ export function scenarioApproachConsistency(rsVals, tcVals) {
 // Distinct from scenarioOffHoursResponseRisk: this captures environmental/fuel conditions,
 // not institutional capacity.
 
-export function scenarioIgnitionTiming(fgVals, tcVals) {
-  const v    = { ...fgVals, ...tcVals };
+export function scenarioIgnitionTiming(fgVals, tcVals, tmVals) {
+  const v    = { ...fgVals, ...tcVals, ...tmVals };
   const hour = v.event_start_hour;
 
   // Peak diurnal window: RH trough, surface wind peaks, fuel moisture lowest
