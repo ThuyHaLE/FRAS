@@ -1,6 +1,26 @@
 # 🔥 WiDS Global Datathon 2026 — Wildfire Survival Modeling
 
-This repository contains my solution for the [WiDS Global Datathon 2026](https://www.kaggle.com/competitions/WiDSWorldWide_GlobalDathon26).
+This repository contains my solution for the [WiDS Global Datathon 2026](https://www.kaggle.com/competitions/WiDSWorldWide_GlobalDathon26). It is **FRAS — Fire Risk Assessment System**.
+
+**💡 Why a dashboard, not just model predictions?**
+
+The model outputs calibrated probabilities (`prob_12h / 24h / 48h / 72h`) — but a single number is rarely enough for operational decision-making.
+
+A few structural limitations worth noting:
+
+- **The model does not use all available features.** After permutation-based selection, each model works with a small subset (6–28 features). Signals like surge acceleration, flanking drift, or off-hours response constraints may carry real operational weight but contribute little to the learned survival function.
+- **Training data quality shapes what the model learns.** Temporal coverage bias means the model partially learns *"well-observed fires near zones are dangerous"* rather than pure fire spread physics. A fire with sparse perimeter data may receive a low probability not because it is safe, but because the model had little signal to work with.
+- **Two fires with identical `prob_24h` can require completely different responses.** One may be a slow large fire that has already consumed most of its distance buffer; the other a small fast-moving fire entering a blowup phase 15 km away. The probability alone does not distinguish them.
+
+The dashboard addresses this by computing **interpretable alarm signals directly from raw feature values** — independent of what the model learned. This creates a transparency layer where:
+
+- Alarm signals surface the *mechanism* behind a prediction (proximity, surge, trajectory confidence, data sparsity, resource availability)
+- Divergence between alarms and model probability is itself informative — it reveals which features the model is not relying on for a given fire
+- The parameter editor lets users probe feature sensitivity interactively, effectively discovering model behavior without reading SHAP values or importance reports
+
+The goal is not to replace the model output but to give emergency managers enough context to act on it — and to know when to trust it.
+
+---
 
 ## 📌 Overview
 
@@ -357,12 +377,9 @@ The repository includes a React-based dashboard (`dashboard/`) that goes well be
  
 ### 1. Why alarms complement model predictions
  
-Survival probabilities answer "will this fire reach a zone within H hours?" but are silent on mechanism. Two fires with `prob_24h = 0.72` can be very different situations:
- 
-- One is a slow-moving large fire already 3 km away with high trajectory confidence
-- The other is a small fast-moving fire 15 km away that just entered a blowup phase
- 
-The alarm system captures these distinctions through feature-level signals that the model internally uses but does not surface to the user.
+Beyond the limitations outlined above, the alarm system addresses a practical gap: probabilities rank fires by urgency but do not explain the mechanism driving that urgency. 
+
+The signals below are designed to fill that gap — each capturing a distinct behavioral axis that the model uses internally but does not surface.
  
 ### 2. Module-level alarms
  
