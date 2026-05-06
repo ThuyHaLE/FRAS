@@ -220,6 +220,11 @@ export function CrossModuleAlarms({ ckVals, fgVals, dirVals, rsVals, tcVals, tmV
     // ── Data quality (read first — contextualizes all downstream signals)
     scenarioDataSparseRisk(rsVals, tcVals),
 
+    // ── Operational impact
+    scenarioContainmentDifficulty(fgVals, rsVals, rhVals),
+    scenarioProjectedAdvance(rsVals),
+    scenarioETA(ckVals, { ...dirVals, ...rsVals }),
+    
     // ── Ignition context
     scenarioIgnitionTiming(fgVals, tcVals),
     scenarioOffHoursResponseRisk(fgVals, tcVals),
@@ -234,11 +239,6 @@ export function CrossModuleAlarms({ ckVals, fgVals, dirVals, rsVals, tcVals, tmV
     scenarioApproachConsistency(rsVals, tcVals),
     scenarioTrajectoryConfidence(rsVals, tcVals),
     scenarioFlankingThreat(ckVals, fgVals),
-
-    // ── Operational impact
-    scenarioProjectedAdvance(rsVals),
-    scenarioETA(ckVals, { ...dirVals, ...rsVals }),
-    scenarioContainmentDifficulty(fgVals, rsVals, rhVals),
   ];
 
   return (

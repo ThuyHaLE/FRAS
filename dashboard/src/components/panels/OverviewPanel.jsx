@@ -41,20 +41,17 @@ export function OverviewPanel({ ckVals, setCkVals, fgVals, setFgVals, dirVals, s
         </div>
       )}
 
-      {/* temporal cards */}
-      {(tcVals || tmVals) && (
+      {(tcVals || tmVals || (ckVals && fgVals && dirVals && rsVals && tcVals && tmVals && rhVals)) && (
         <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 14 }}>
           {tcVals && <TemporalCoverageCard vals={tcVals} />}
           {tmVals && <TemporalMetadataCard vals={tmVals} />}
+          {ckVals && fgVals && dirVals && rsVals && tcVals && tmVals && rhVals && (
+            <CrossModuleAlarms
+              ckVals={ckVals} fgVals={fgVals} dirVals={dirVals}
+              rsVals={rsVals} tcVals={tcVals} tmVals={tmVals} rhVals={rhVals}
+            />
+          )}
         </div>
-      )}
-
-      {/* cross-module alarms */}
-      {ckVals && fgVals && dirVals && rsVals && tcVals && tmVals && rhVals && (
-        <CrossModuleAlarms
-          ckVals={ckVals} fgVals={fgVals} dirVals={dirVals}
-          rsVals={rsVals} tcVals={tcVals} tmVals={tmVals} rhVals={rhVals}
-        />
       )}
     </div>
   );

@@ -14,6 +14,7 @@
 //   - Negative feature values (retreat, shrink) clamp to 0 without breaking hint strings
 
 import { clamp01, alarmLevel } from "../utils/alarmUtils";
+import { R } from "../constants/featureRanges";
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 
@@ -41,7 +42,7 @@ export function scenarioETA(ckVals, rsVals) {
   const etaH       = effectiveSpeed > 0.5 ? v.dist_min_ci_0_5h / effectiveSpeed : null;
   const etaScore   = effectiveSpeed > 0.5 ? clamp01(1 - etaH / 72) : 0;
   const alignScore = clamp01(((v.alignment_cos ?? 0) - 0.2) / 0.8);
-  const speedScore = clamp01(v.centroid_speed_m_per_h / 600);
+  const speedScore = clamp01(v.centroid_speed_m_per_h / R("centroid_speed_m_per_h").max);
   const combined   = clamp01(etaScore * 0.6 + alignScore * 0.25 + speedScore * 0.15);
   const etaLabel   = etaH === null
     ? "N/A (stationary)"
@@ -76,9 +77,9 @@ export function scenarioETA(ckVals, rsVals) {
 
 export function scenarioSpreadPressure(ckVals, fgVals, dirVals) {
   const v         = { ...ckVals, ...fgVals, ...dirVals };
-  const radialNorm = clamp01(v.radial_growth_rate_m_per_h / 360);
+  const radialNorm = clamp01(v.radial_growth_rate_m_per_h / R("radial_growth_rate_m_per_h").max);
   const alignPos   = clamp01(v.alignment_cos);
-  const areaScale  = clamp01(Math.log1p(v.area_first_ha) / 9.4);
+  const areaScale  = clamp01(Math.log1p(v.area_first_ha) / R("log1p_area_first").max);
   const pressure   = clamp01(radialNorm * alignPos * (0.5 + 0.5 * areaScale));
   const level      = alarmLevel(pressure);
 
@@ -109,9 +110,9 @@ export function scenarioSpreadPressure(ckVals, fgVals, dirVals) {
 export function scenarioContainmentDifficulty(fgVals, rsVals, rhVals) {
   // rhVals carries reach/probability fields (prob_24h etc.)
   const v          = { ...fgVals, ...rsVals, ...rhVals };
-  const sizeScore  = clamp01(Math.log1p(v.area_first_ha) / 9.4);
-  const growthScore = clamp01(Math.sqrt(v.area_growth_rate_ha_per_h / 525));
-  const proxScore  = clamp01(1 - Math.pow(v.dist_min_ci_0_5h / 800000, 0.5));
+  const sizeScore   = clamp01(Math.log1p(v.area_first_ha) / R("log1p_area_first").max);
+  const growthScore = clamp01(Math.sqrt(v.area_growth_rate_ha_per_h / R("area_growth_rate_ha_per_h").max));
+  const proxScore   = clamp01(1 - Math.pow(v.dist_min_ci_0_5h / R("dist_min_ci_0_5h").max, 0.5));
   const probScore  = clamp01(v.prob_24h);
   const combined   = clamp01(0.20 * sizeScore + 0.35 * growthScore + 0.15 * proxScore + 0.30 * probScore);
   const level      = alarmLevel(combined);
@@ -144,9 +145,9 @@ export function scenarioContainmentDifficulty(fgVals, rsVals, rhVals) {
 export function scenarioTrajectoryConfidence(rsVals, tcVals) {
   const v        = { ...rsVals, ...tcVals };
   const r2       = clamp01(v.dist_fit_r2_0_5h);
-  const slopeNeg = clamp01(-v.dist_slope_ci_0_5h / 600);
-  const accelNeg = clamp01(-v.dist_accel_m_per_h2 / 120);
-  const dataOk   = clamp01((v.num_perimeters_0_5h - 1) / 19);
+  const slopeNeg = clamp01(-v.dist_slope_ci_0_5h / Math.abs(R("dist_slope_ci_0_5h").min));
+  const accelNeg = clamp01(-v.dist_accel_m_per_h2 / Math.abs(R("dist_accel_m_per_h2").min));
+  const dataOk   = clamp01((v.num_perimeters_0_5h - 1) / (R("num_perimeters_0_5h").max - 1));
   const combined = clamp01(r2 * 0.35 + slopeNeg * 0.35 + accelNeg * 0.15 + dataOk * 0.15);
   const level    = alarmLevel(combined);
 
@@ -177,9 +178,9 @@ export function scenarioTrajectoryConfidence(rsVals, tcVals) {
 
 export function scenarioSurgeRisk(ckVals, fgVals, rsVals, tcVals) {
   const v            = { ...ckVals, ...fgVals, ...rsVals, ...tcVals };
-  const growthAccel  = clamp01(Math.sqrt(v.area_growth_rate_ha_per_h / 525));
-  const closingAccel = clamp01(-v.dist_accel_m_per_h2 / 120);
-  const speedUp      = clamp01(v.centroid_speed_m_per_h / 600);
+  const growthAccel  = clamp01(Math.sqrt(v.area_growth_rate_ha_per_h / R("area_growth_rate_ha_per_h").max));
+  const closingAccel = clamp01(-v.dist_accel_m_per_h2 / Math.abs(R("dist_accel_m_per_h2").min));
+  const speedUp      = clamp01(v.centroid_speed_m_per_h / R("centroid_speed_m_per_h").max);
   const dataConf     = v.low_temporal_resolution_0_5h === 1 ? 0.5 : 1.0;
   const surgeSignal  = clamp01((growthAccel * 0.4 + closingAccel * 0.4 + speedUp * 0.2) * dataConf);
   const level        = alarmLevel(surgeSignal);
@@ -213,8 +214,8 @@ export function scenarioDataSparseRisk(rsVals, tcVals) {
   const v         = { ...rsVals, ...tcVals };
   const lowRes    = v.low_temporal_resolution_0_5h === 1 ? 1.0 : 0.0;
   const r2Low     = clamp01(1 - v.dist_fit_r2_0_5h);
-  const fewPeri   = clamp01(1 - (v.num_perimeters_0_5h - 1) / 19);
-  const shortSpan = clamp01(1 - v.dt_first_last_0_5h / 5);
+  const fewPeri   = clamp01(1 - (v.num_perimeters_0_5h - 1) / (R("num_perimeters_0_5h").max - 1));
+  const shortSpan = clamp01(1 - v.dt_first_last_0_5h / R("dt_first_last_0_5h").max);
   const sparsity  = clamp01(0.35 * lowRes + 0.25 * r2Low + 0.25 * fewPeri + 0.15 * shortSpan);
   const level     = alarmLevel(sparsity);
 
@@ -245,9 +246,11 @@ export function scenarioDataSparseRisk(rsVals, tcVals) {
 export function scenarioFlankingThreat(ckVals, fgVals) {
   const v = { ...ckVals, ...fgVals };
 
-  const crossTrack  = clamp01(Math.abs(v.cross_track_component) / 400);
-  const frontWidth  = clamp01(v.radial_growth_rate_m_per_h / 360);
-  const sizeAmplify = clamp01(Math.log1p(v.area_first_ha) / 9.4);
+  // cross_track ceiling: use the larger absolute bound of the signed range
+  const crossCeil   = Math.max(Math.abs(R("cross_track_component").min), R("cross_track_component").max);
+  const crossTrack  = clamp01(Math.abs(v.cross_track_component) / crossCeil);
+  const frontWidth  = clamp01(v.radial_growth_rate_m_per_h / R("radial_growth_rate_m_per_h").max);
+  const sizeAmplify = clamp01(Math.log1p(v.area_first_ha) / R("log1p_area_first").max);
   // Size is amplifier, not additive: small fires have limited flank reach regardless
   const combined    = clamp01((crossTrack * 0.50 + frontWidth * 0.50) * (0.4 + 0.6 * sizeAmplify));
   const level       = alarmLevel(combined);
@@ -281,11 +284,9 @@ export function scenarioFlankingThreat(ckVals, fgVals) {
 export function scenarioApproachConsistency(rsVals, tcVals) {
   const v = { ...rsVals, ...tcVals };
 
-  const fitQuality    = clamp01(v.dist_fit_r2_0_5h);
-  const closingSlope  = clamp01(-v.dist_slope_ci_0_5h / 600);
-  // Low dist_std = perimeter approaching evenly (coherent front); high = multi-front chaos
-  // Ceiling aligned with scenarioFrontFragmentation for consistency
-  const frontCoherence = clamp01(1 - v.dist_std_ci_0_5h / 9000);
+  const fitQuality     = clamp01(v.dist_fit_r2_0_5h);
+  const closingSlope   = clamp01(-v.dist_slope_ci_0_5h / Math.abs(R("dist_slope_ci_0_5h").min));
+  const frontCoherence = clamp01(1 - v.dist_std_ci_0_5h / R("dist_std_ci_0_5h").max);
 
   // closingSlope is the gate: if fire isn't closing, fit quality is irrelevant
   const combined = clamp01(closingSlope * (fitQuality * 0.55 + frontCoherence * 0.45));
@@ -300,7 +301,7 @@ export function scenarioApproachConsistency(rsVals, tcVals) {
     signals: [
       { name: "fit quality (R²)",  value: fitQuality,    hint: `R² = ${v.dist_fit_r2_0_5h.toFixed(2)} — ${fitQuality > 0.7 ? "consistent trend" : fitQuality > 0.3 ? "moderate fit" : "noisy / erratic"}` },
       { name: "closing slope",     value: closingSlope,  hint: `${v.dist_slope_ci_0_5h.toFixed(1)} m/h — ${v.dist_slope_ci_0_5h < 0 ? "approaching" : "retreating or stable"}` },
-      { name: "front coherence",   value: frontCoherence, hint: `dist_std = ${v.dist_std_ci_0_5h.toFixed(0)} m — ${v.dist_std_ci_0_5h < 2000 ? "coherent front" : v.dist_std_ci_0_5h < 5000 ? "moderate spread" : "fragmented / multi-front"}` },
+      { name: "front coherence",   value: frontCoherence, hint: `dist_std = ${v.dist_std_ci_0_5h.toFixed(0)} m — ${v.dist_std_ci_0_5h < 300 ? "coherent front" : v.dist_std_ci_0_5h < 600 ? "moderate spread" : "fragmented / multi-front"}` },
     ],
     summary: {
       ok:    "No consistent closing trend — approach signals are weak, noisy, or fire is not advancing.",
@@ -380,7 +381,7 @@ export function scenarioRelativeGrowthIntensity(fgVals) {
   const relGrowthScore = clamp01(nn(logRatio) / Math.log(20)); // ceiling: 20× expansion
 
   // Radial growth in absolute meters; ceiling ~2 km for extreme events
-  const radialScore    = clamp01(nn(v.radial_growth_m) / 2000);
+  const radialScore    = clamp01(nn(v.radial_growth_m) / R("radial_growth_m").max);
 
   // area_growth_rel: fraction — 0.5 = +50%, 2.0 = +200%; log-compressed, ceiling at 5×
   const relFracScore   = clamp01(Math.log1p(nn(v.area_growth_rel_0_5h)) / Math.log1p(5));
@@ -429,7 +430,7 @@ export function scenarioProjectedAdvance(rsVals) {
     ? clamp01(advance / v.dist_min_ci_0_5h)
     : 1.0;
 
-  const speedScore   = clamp01(v.closing_speed_m_per_h / 600);
+  const speedScore   = clamp01(v.closing_speed_m_per_h / R("closing_speed_m_per_h").max);
 
   const combined = clamp01(advanceScore * 0.30 + bufferRatio * 0.50 + speedScore * 0.20);
   const level    = alarmLevel(combined);
@@ -466,9 +467,9 @@ export function scenarioProjectedAdvance(rsVals) {
 export function scenarioFrontFragmentation(rsVals, fgVals) {
   const v = { ...rsVals, ...fgVals };
 
-  // dist_std ceiling: 9000 m — aligned with scenarioApproachConsistency
-  const distSpread  = clamp01(v.dist_std_ci_0_5h / 9000);
-  const radialWidth = clamp01(v.radial_growth_rate_m_per_h / 360);
+  // aligned with scenarioApproachConsistency
+  const distSpread  = clamp01(v.dist_std_ci_0_5h / R("dist_std_ci_0_5h").max);
+  const radialWidth = clamp01(v.radial_growth_rate_m_per_h / R("radial_growth_rate_m_per_h").max);
   // Relative growth amplifies: fragmented + fast-growing = worst case
   const growthAmpli = clamp01(Math.log1p(nn(v.area_growth_rel_0_5h)) / Math.log1p(5));
 
@@ -483,7 +484,7 @@ export function scenarioFrontFragmentation(rsVals, fgVals) {
     accentColor: "#8E44AD",
     overallScore: combined,
     signals: [
-      { name: "distance spread (σ)", value: distSpread,  hint: `dist_std = ${v.dist_std_ci_0_5h.toFixed(0)} m — ${v.dist_std_ci_0_5h > 5000 ? "highly fragmented" : v.dist_std_ci_0_5h > 2000 ? "moderate fragmentation" : "coherent front"}` },
+      { name: "distance spread (σ)", value: distSpread,  hint: `dist_std = ${v.dist_std_ci_0_5h.toFixed(0)} m — ${v.dist_std_ci_0_5h > 600 ? "highly fragmented" : v.dist_std_ci_0_5h > 300 ? "moderate fragmentation" : "coherent front"}` },
       { name: "radial front width",  value: radialWidth, hint: `${fmtSpeed(v.radial_growth_rate_m_per_h)} radial — widening perimeter` },
       { name: "growth amplifier",    value: growthAmpli, hint: `+${(nn(v.area_growth_rel_0_5h) * 100).toFixed(0)}% relative growth — amplifies multi-flank risk` },
     ],
