@@ -219,7 +219,7 @@ export const FG_FEATURES = [
         R("log_area_ratio_0_5h").min+2*((R("log_area_ratio_0_5h").max - R("log_area_ratio_0_5h").min) / 4), 
         R("log_area_ratio_0_5h").min+3*((R("log_area_ratio_0_5h").max - R("log_area_ratio_0_5h").min) / 4), 
         R("log_area_ratio_0_5h").max],
-    toNorm: (v) => Math.min(v / R("log_area_ratio_0_5h").max, 1),
+    toNorm: (v) => (v - R("log_area_ratio_0_5h").min) / (R("log_area_ratio_0_5h").max - R("log_area_ratio_0_5h").min),
     meaning: "Log ratio of final to initial area over 0.5h.",
     hint: "Higher ratio → explosive relative expansion.",
   },
@@ -259,10 +259,10 @@ export const FG_FEATURES = [
 ];
 
 export const FG_GROUPS = [
-  { label: "Group A — absolute growth", dotColor: "#D85A30" },
-  { label: "Group B — relative growth", dotColor: "#1D9E75" },
-  { label: "Group C — speed & geometry", dotColor: "#378ADD" },
-  { label: "Group D — initial state",   dotColor: "#7F77DD" },
+  { label: "Group A — initial state",    dotColor: "#D85A30" },
+  { label: "Group B — absolute growth",  dotColor: "#1D9E75" },
+  { label: "Group C — relative growth",  dotColor: "#378ADD" },
+  { label: "Group D — speed & geometry", dotColor: "#7F77DD" },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════
