@@ -284,90 +284,110 @@ WBS = 0.3 × Brier@24h + 0.4 × Brier@48h + 0.3 × Brier@72h
 ---
  
 ## 📈 Results
- 
-Five feature strategies were evaluated to understand the contribution of distance bias, feature selection, and enrichment:
- 
+
+Five feature strategies were evaluated to understand the contribution 
+of distance bias, feature selection, and enrichment:
+
 ### 1. Only `dist_min_ci_0_5h` (1 feature)
- 
-| Model | CV Hybrid Score | OOF Hybrid Score | Public LB |
-|---|---|---|---|
-| RSF | 0.9634 ± 0.0125 | 0.9645 | 0.94223 |
-| GB | 0.9620 ± 0.0120 | 0.9631 | 0.93615 |
-| Coxnet | 0.9540 ± 0.0130 | 0.9547 | 0.94172 |
-| CGB | 0.8949 ± 0.0171 | 0.8763 | 0.89244 |
- 
+
+| Model | CV Hybrid Score | OOF Hybrid Score | Public LB | Private LB |
+|---|---|---|---|---|
+| RSF | 0.9634 ± 0.0125 | 0.9645 | 0.94223 | 0.92047 |
+| GB | 0.9620 ± 0.0120 | 0.9631 | 0.93615 | 0.93530 |
+| Coxnet | 0.9540 ± 0.0130 | 0.9547 | 0.94172 | 0.94422 |
+| CGB | 0.8949 ± 0.0171 | 0.8763 | 0.89244 | 0.91058 |
+
 ### 2. Base Features (34 features, no selection)
- 
-| Model | CV Hybrid Score | OOF Hybrid Score | Public LB |
-|---|---|---|---|
-| RSF | 0.9315 ± 0.0094 | 0.9290 | 0.89954 |
-| GB | 0.9728 ± 0.0041 | 0.9724 | 0.96382 |
-| Coxnet | 0.8071 ± 0.1336 | 0.8244 | 0.89657 |
-| CGB | 0.8943 ± 0.0148 | 0.8888 | 0.86591 |
-| Ensemble 2 models (RSF=0.304, GB=0.696) | — | 0.9701 | 0.96124 |
-| Ensemble 4 models (RSF=0.000, GB=0.804, CGB=0.167, Coxnet=0.029) | — | 0.9709 | 0.96331 |
- 
+
+| Model | CV Hybrid Score | OOF Hybrid Score | Public LB | Private LB |
+|---|---|---|---|---|
+| RSF | 0.9315 ± 0.0094 | 0.9290 | 0.89954 | 0.89710 |
+| GB | 0.9728 ± 0.0041 | 0.9724 | 0.96382 | 0.94672 |
+| Coxnet | 0.8071 ± 0.1336 | 0.8244 | 0.89657 | 0.92199 |
+| CGB | 0.8943 ± 0.0148 | 0.8888 | 0.86591 | 0.89453 |
+| Ensemble 2 models (RSF=0.304, GB=0.696) | — | 0.9701 | 0.96124 | 0.94471 |
+| Ensemble 4 models (RSF=0.000, GB=0.804, CGB=0.167, Coxnet=0.029) | — | 0.9709 | 0.96331 | 0.95710 |
+
 ### 3. Base Features + Per-Model Feature Selection
- 
+
 Selected features per model: **RSF** (9): `dist_min_ci_0_5h`, `event_start_dayofweek`, `alignment_abs`, `dt_first_last_0_5h`, `num_perimeters_0_5h`, `low_temporal_resolution_0_5h`, `spread_bearing_cos`, `alignment_cos`, `spread_bearing_deg` — **GB** (8): `dist_min_ci_0_5h`, `num_perimeters_0_5h`, `dt_first_last_0_5h`, `log1p_area_first`, `alignment_abs`, `spread_bearing_cos`, `alignment_cos`, `low_temporal_resolution_0_5h` — **Coxnet** (20): `dist_min_ci_0_5h`, `num_perimeters_0_5h`, `spread_bearing_sin`, `spread_bearing_deg`, `dist_accel_m_per_h2`, `area_growth_rate_ha_per_h`, `closing_speed_abs_m_per_h`, `dist_fit_r2_0_5h`, `dist_slope_ci_0_5h`, `centroid_speed_m_per_h`, `spread_bearing_cos`, `area_first_ha`, `along_track_speed`, `cross_track_component`, `area_growth_abs_0_5h`, `low_temporal_resolution_0_5h`, `projected_advance_m`, `dist_change_ci_0_5h`, `log1p_growth`, `dt_first_last_0_5h` — **CGB** (6): `dist_min_ci_0_5h`, `num_perimeters_0_5h`, `low_temporal_resolution_0_5h`, `alignment_abs`, `cross_track_component`, `spread_bearing_deg`
- 
-| Model | CV Hybrid Score | OOF Hybrid Score | Public LB |
-|---|---|---|---|
-| RSF | 0.9739 ± 0.0054 | 0.9724 | **0.96530** |
-| GB | 0.9737 ± 0.0067 | 0.9726 | 0.96322 |
-| Coxnet | 0.9068 ± 0.0212 | 0.9056 | 0.91824 |
-| CGB | 0.8956 ± 0.0132 | 0.8907 | 0.86645 |
-| Ensemble 2 models (RSF=0.501, GB=0.499) | — | 0.9711 | 0.96452 |
-| Ensemble 4 models (RSF=0.000, GB=0.827, CGB=0.173, Coxnet=0.000) | — | 0.9713 | 0.96267 |
- 
+
+| Model | CV Hybrid Score | OOF Hybrid Score | Public LB | Private LB |
+|---|---|---|---|---|
+| RSF | 0.9739 ± 0.0054 | 0.9724 | **0.96530** | 0.92680 |
+| GB | 0.9737 ± 0.0067 | 0.9726 | 0.96322 | 0.94517 |
+| Coxnet | 0.9068 ± 0.0212 | 0.9056 | 0.91824 | 0.93849 |
+| CGB | 0.8956 ± 0.0132 | 0.8907 | 0.86645 | 0.89543 |
+| Ensemble 2 models (RSF=0.501, GB=0.499) | — | 0.9711 | 0.96452 | 0.93618 |
+| Ensemble 4 models (RSF=0.000, GB=0.827, CGB=0.173, Coxnet=0.000) | — | 0.9713 | 0.96267 | 0.95402 |
+
 ### 4. Base Features + Enriched Features — all 80 features, no selection (removes `dist_min_ci_0_5h`)
- 
-| Model | CV Hybrid Score | OOF Hybrid Score | Public LB |
-|---|---|---|---|
-| RSF | 0.9699 ± 0.0156 | 0.9677 | 0.94411 |
-| GB | 0.9715 ± 0.0045 | 0.9703 | 0.96090 |
-| Coxnet | 0.8999 ± 0.0314 | 0.9022 | 0.89194 |
-| CGB | 0.9554 ± 0.0091 | 0.9534 | 0.93125 |
-| Ensemble 2 models (RSF=0.492, GB=0.508) | — | 0.9693 | 0.96051 |
-| Ensemble 4 models (RSF=0.492, GB=0.508, Coxnet=0.000, CGB=0.000) | — | 0.9693 | 0.96051 |
- 
+
+| Model | CV Hybrid Score | OOF Hybrid Score | Public LB | Private LB |
+|---|---|---|---|---|
+| RSF | 0.9699 ± 0.0156 | 0.9677 | 0.94411 | 0.92439 |
+| GB | 0.9715 ± 0.0045 | 0.9703 | 0.96090 | 0.95728 |
+| Coxnet | 0.8999 ± 0.0314 | 0.9022 | 0.89194 | 0.91666 |
+| CGB | 0.9554 ± 0.0091 | 0.9534 | 0.93125 | 0.95508 |
+| Ensemble 2 models (RSF=0.492, GB=0.508) | — | 0.9693 | 0.96051 | 0.94890 |
+| Ensemble 4 models (RSF=0.492, GB=0.508, Coxnet=0.000, CGB=0.000) | — | 0.9693 | 0.96051 | 0.94890 |
+
 ### 5. Enriched Features + Per-Model Feature Selection (removes `dist_min_ci_0_5h`) ✅ Final
- 
+
 Selected features per model: **RSF** (14): `log1p_dist_min`, `eta_along_track`, `eta_projected`, `eta_closing`, `eta_aligned_along`, `eta_radial`, `eta_combined`, `eta_bearing_adjusted`, `alignment_x_nperim`, `dt_first_last_0_5h`, `alignment_abs`, `dt_x_alignment`, `dist_per_area`, `low_temporal_resolution_0_5h` — **GB** (7): `log1p_dist_min`, `eta_closing`, `dist_per_area`, `eta_aligned_along`, `dt_first_last_0_5h`, `eta_projected`, `eta_along_track` — **Coxnet** (28): `log1p_dist_min`, `num_perimeters_0_5h`, `dist_per_area`, `log1p_area_first`, `dt_first_last_0_5h`, `alignment_abs`, `area_speed_ratio`, `eta_closing`, `alignment_x_nperim`, `dist_fit_r2_0_5h`, `dist_cv`, `cross_track_component`, `eta_projected`, `reliable_accel`, `dt_x_alignment`, `dist_change_norm`, `directional_growth`, `log1p_reliable_slope`, `dist_slope_ci_0_5h`, `growth_pressure`, `spread_bearing_sin`, `area_first_ha`, `low_temporal_resolution_0_5h`, `event_start_month`, `reliable_eta_ci`, `spread_bearing_deg`, `linear_eta_ci`, `is_approaching` — **CGB** (6): `log1p_dist_min`, `eta_closing`, `alignment_abs`, `eta_combined`, `eta_aligned_along`, `cross_track_component`
- 
-| Model | CV Hybrid Score | OOF Hybrid Score | Public LB |
-|---|---|---|---|
-| RSF | 0.9737 ± 0.0061 | 0.9711 | 0.96270 |
-| GB | 0.9736 ± 0.0063 | 0.9715 | 0.96377 |
-| Coxnet | 0.9127 ± 0.0412 | 0.9121 | 0.90317 |
-| CGB | 0.9581 ± 0.0085 | 0.9560 | 0.93059 |
-| Ensemble 2 models (RSF=0.500, GB=0.500) | — | 0.9689 | **0.96448** |
-| Ensemble 4 models (RSF=0.000, GB=0.772, CGB=0.000, Coxnet=0.228) | — | 0.9698 | 0.96253 |
- 
+
+| Model | CV Hybrid Score | OOF Hybrid Score | Public LB | Private LB |
+|---|---|---|---|---|
+| RSF | 0.9737 ± 0.0061 | 0.9711 | 0.96270 | 0.93674 |
+| GB | 0.9736 ± 0.0063 | 0.9715 | 0.96377 | 0.95588 |
+| Coxnet | 0.9127 ± 0.0412 | 0.9121 | 0.90317 | 0.94538 |
+| CGB | 0.9581 ± 0.0085 | 0.9560 | 0.93059 | 0.95585 |
+| Ensemble 2 models (RSF=0.500, GB=0.500) | — | 0.9689 | 0.96448 | 0.95008 |
+| Ensemble 4 models (RSF=0.000, GB=0.772, Coxnet=0.228, CGB=0.000) | — | 0.9698 | 0.96253 | **0.95847** |
+
 ---
- 
+
+### 📊 Public vs Private Gap — Summary
+
+The table below tracks how well each ensemble configuration generalises from public to private LB. A smaller gap indicates more robust generalisation.
+
+| Case | Configuration | Public LB | Private LB | Gap |
+|------|--------------|-----------|------------|-----|
+| 3 | RSF single (base + filter) | 0.96530 | 0.92680 | -0.039 |
+| 3 | Ensemble 2 (base + filter) | 0.96452 | 0.93618 | -0.030 |
+| 2 | Ensemble 2 (base, no filter) | 0.96124 | 0.94471 | -0.017 |
+| 5 | Ensemble 2 (enriched + filter) | 0.96448 | 0.95008 | -0.014 |
+| 2 | Ensemble 4 (base, no filter) | 0.96331 | 0.95710 | -0.006 |
+| 5 | Ensemble 4 (enriched + filter) | 0.96253 | **0.95847** | **-0.004** |
+
+The gap narrows consistently as the approach moves from proximity shortcuts (Case 3) toward physics-grounded features and broader ensembles (Case 5). The final configuration (Case 5, Ensemble 4) achieves the smallest gap and the highest private LB across all cases.
+
+---
+
 ### Key Observations
 
-**`dist_min_ci_0_5h` alone is a surprisingly strong predictor:** A single-feature model (Case 1) achieves LB 0.942 for RSF — comparable to or better than many multi-feature baselines. This confirms that proximity to the evacuation zone dominates the prediction signal and can mask the contribution of all other features.
+**`dist_min_ci_0_5h` alone is a surprisingly strong predictor:** A single-feature RSF (Case 1) reaches public LB 0.942 — comparable to many multi-feature baselines. This confirms that proximity dominates the prediction signal and can mask the contribution of all other features.
 
-**Base features without selection → CV inflated, LB unstable (Case 2):** RSF drops from CV 0.9315 to LB 0.8995 — a gap of ~0.03. With all 34 features including `dist_min_ci_0_5h`, the model anchors on proximity and temporal coverage bias without learning fire dynamics.
+**Base features without selection → CV inflated, LB unstable (Case 2):** RSF drops from CV 0.9315 to public LB 0.8995 (~0.03 gap). With all 34 features including `dist_min_ci_0_5h`, the model anchors on proximity and temporal coverage bias without learning fire dynamics.
 
-**Base features + filter → highest single-model LB, but for the wrong reason (Case 3):** RSF with 9 selected base features reaches LB **0.96530** — the highest single-model score across all cases. However, 7 of 9 features are `dist_min_ci_0_5h`, temporal coverage proxies, or bearing angles. The model is not learning fire spread physics — it is learning a compact proximity-and-observation-quality signal. This result is fragile: any distribution shift in distance or observation density on test would likely cause it to degrade.
+**Base features + filter → highest single-model public LB, but confirmed fragile on private (Case 3):** RSF reaches public LB **0.96530** — the highest single-model score across all cases. But private LB drops to **0.92680**, a gap of 0.039. This is the clearest evidence in the results that learning a compact proximity-and-observation-quality signal does not generalise: the public/private split exposed exactly the distribution shift that was anticipated.
 
-**Enriched features without selection → too much noise (Case 4):** Feeding all 80 features with no filtering hurts RSF significantly (LB 0.944) and does not benefit GB meaningfully (LB 0.961). Without feature selection, the enriched space introduces more noise than signal for tree models.
+**Enriched features without selection → too much noise (Case 4):** Feeding all 80 features without filtering hurts RSF (public 0.944) and does not meaningfully benefit GB (public 0.961). Without feature selection, the enriched space introduces more noise than signal for tree models.
 
-**Enriched features + filter → best ensemble and most robust (Case 5 ✅):** The final approach trades ~0.001 single-model LB vs Case 3, but predicts based on ETA estimates, directional threat, and growth-distance interactions — features grounded in fire spread physics. The ensemble (0.96448) generalises more reliably because individual model predictions are not dominated by a single raw feature.
+**Enriched features + filter → most robust generalisation, with a public/private tradeoff in the ensemble (Case 5 ✅):** The final approach removes the proximity shortcut and builds on ETA estimates, directional threat, and growth-distance interactions — features grounded in fire spread physics.
 
-**Coxnet and CGB underperform consistently:** Despite feature selection, both models lag significantly behind RSF and GB across all cases. Coxnet also shows high CV variance (±0.04 on enriched features), indicating instability. Adding them to the ensemble never improves LB — the optimizer either zeros them out or assigns marginal weight, confirming they do not add complementary signal.
- 
-**Limitations and future directions:** Feature enrichment improves all models on CV, but the gains do not translate equally across models or to ensemble diversity. A few specific observations:
+At the ensemble level, there is a clear tradeoff between the two configurations:
 
-- **GB enrichment is marginal:** GB base (LB 0.96382) and GB enriched (LB 0.96377) are nearly identical, suggesting GB already saturates on the core ETA + distance signal and enrichment adds little beyond what the base features capture.
-- **Linear models struggle with non-linear features:** The engineered features are predominantly non-linear transformations (ETA ratios, log-compressed speeds, trigonometric bearing terms) — tree-based models (RSF, GB) exploit these directly, but Coxnet requires 28 features after selection yet still underperforms, likely because these transformations do not align with its linear proportional-hazard assumption.
-- **Feature selection thresholds are fixed and may not be optimal:** `TierThresholds` uses fixed importance cutoffs (`star=0.005`, `tier2=0.0005`, `noise_ratio=5.0`) tuned for small datasets. Since Coxnet's permutation importance scale is ~10–30× larger than tree-based models, it uses separate `COXNET_THRESHOLDS` — but both are manually set and could benefit from cross-validated threshold search.
-- **`enrich_features` is a fixed pipeline:** All feature groups are computed unconditionally and several internal constants (`SLOPE_THRESHOLD = -0.1`, `MAX_ETA_HOURS = 500`, `EPS = 0.01`) are hardcoded magic numbers. These could be tuned — for instance, tightening `SLOPE_THRESHOLD` to filter out noisy ETA estimates, or adding new feature groups (e.g. weather × terrain interactions) — without changing anything else in the pipeline.
+- **Ensemble 2 models (RSF + GB):** higher public LB (0.96448) but lower private LB (0.95008)
+- **Ensemble 4 models (GB + Coxnet):** lower public LB (0.96253) but highest private LB across all cases (**0.95847**)
 
-A natural next step would be to include non-linear models with different inductive biases — such as `XGBSEDebiasedBCE` (already implemented in this repo) or neural survival models (e.g. DeepSurv) — which may capture interaction patterns that RSF and GB miss, and could add genuine diversity to the ensemble beyond what Coxnet/CGB offer.
+The 4-model ensemble also scores higher on CV (0.9698 vs 0.9689). The public/private divergence here reflects a distribution shift between the two leaderboard splits — which configuration to trust depends on whether you use public LB or CV score as a proxy for the private set. In this case, CV score aligned better with private LB — but this cannot 
+be known in advance without seeing the private results.
+
+**Coxnet: public LB understates actual performance.** Across all cases, Coxnet consistently scores lower on public LB than on private — for example in Case 5: public 0.903 vs private **0.945**. This suggests Coxnet's regularized linear structure generalises well but happens to underfit whatever subset of fires the public split contains. It is not 
+a weak model — it is a model whose public score is a poor proxy for its true generalisation.
+
+**CGB shows the same pattern in enriched features (Case 4):** CGB public 0.931 vs private **0.955** — a gap of 0.024 in the opposite direction of what was seen with tree models in Case 3. Combined with Coxnet's behaviour, this suggests the public/private split has a systematic bias that favours RSF and GB over linear and component-wise models.
 
 ---
  
@@ -504,3 +524,4 @@ FRAS/
 * Final Submission: May 1, 2026
   
 * Personal: built end-to-end from Apr 16 to May 6, 2026
+* Final result: Public LB 0.96253 · Private LB 0.95847
